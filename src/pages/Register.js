@@ -55,10 +55,50 @@ const StyledLink = styled(Link)`
 function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setEmailError('');
+    setPasswordError('');
+
+    if (!email) {
+      setEmailError('Por favor, insira um email.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Por favor, insira um email válido.');
+      return;
+    }
+
+    if (!password) {
+      setPasswordError('Por favor, insira uma senha.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setPasswordError('A senha deve ter no mínimo 6 caracteres.');
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setPasswordError('A senha deve conter pelo menos uma letra maiúscula.');
+      return;
+    }
+
+    if (!/[a-z]/.test(password)) {
+      setPasswordError('A senha deve conter pelo menos uma letra minúscula.');
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setPasswordError('A senha deve conter pelo menos um número.');
+      return;
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -85,12 +125,14 @@ function Register() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+        {emailError && <p style={{ color: 'red' }}>{emailError}</p>}
         <Input
           type="password"
           placeholder="Senha"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
         <Button type="submit">Cadastrar</Button>
       </Form>
       <StyledLink to="/">Já tenho uma conta</StyledLink>

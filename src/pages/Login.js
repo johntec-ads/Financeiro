@@ -52,6 +52,17 @@ const StyledLink = styled(Link)`
   }
 `;
 
+const ForgotPasswordLink = styled(Link)`
+  margin-top: 5px;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -92,6 +103,7 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <Button type="submit">Entrar</Button>
+        <ForgotPasswordLink to="/forgot-password">Esqueci minha senha</ForgotPasswordLink>
       </Form>
       <StyledLink to="/register">Criar conta</StyledLink>
     </Container>
