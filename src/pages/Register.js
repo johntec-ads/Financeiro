@@ -15,6 +15,8 @@ const Container = styled.div`
 
 const Title = styled.h1`
   font-size: 24px;
+  margin-bottom: 20px;
+`;
 
 const Form = styled.form`
   display: flex;
@@ -72,6 +74,8 @@ const Rule = styled.p`
 function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
@@ -118,8 +122,15 @@ function Register() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           const user = userCredential.user;
+          // Adiciona os dados do usuário ao Firestore
+          await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+          });
           navigate('/dashboard');
         })
         .catch((error) => {
@@ -146,6 +157,18 @@ function Register() {
     <Container>
       <Title>Criar Conta</Title>
       <Form onSubmit={handleRegister}>
+        <Input
+          type="text"
+          placeholder="Nome"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+        />
+        <Input
+          type="text"
+          placeholder="Sobrenome"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+        />
         <Input
           type="email"
           placeholder="Email"
