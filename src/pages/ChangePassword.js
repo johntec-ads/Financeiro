@@ -42,6 +42,23 @@ const Button = styled.button`
   }
 `;
 
+const PasswordRules = styled.div`
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+`;
+
+const Rule = styled.p`
+  margin: 5px 0;
+  color: ${props => props.valid ? 'green' : '#666'};
+  &::before {
+    content: '✓ ';
+    color: ${props => props.valid ? 'green' : '#ccc'};
+  }
+`;
+
 function ChangePassword() {
   const [newPassword, setNewPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -85,6 +102,16 @@ function ChangePassword() {
     }
   };
 
+  const validatePassword = (pass) => {
+    setNewPassword(pass);
+    if (!pass) {
+      setPasswordError('Por favor, insira uma senha.');
+      return;
+    }
+    // Limpa o erro se houver validações em andamento
+    setPasswordError('');
+  };
+
   return (
     <Container>
       <Title>Alterar Senha</Title>
@@ -93,8 +120,15 @@ function ChangePassword() {
           type="password"
           placeholder="Nova Senha"
           value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
+          onChange={(e) => validatePassword(e.target.value)}
         />
+        <PasswordRules>
+          <p>Sua senha deve conter:</p>
+          <Rule valid={newPassword.length >= 6}>Mínimo de 6 caracteres</Rule>
+          <Rule valid={/[A-Z]/.test(newPassword)}>Uma letra maiúscula</Rule>
+          <Rule valid={/[a-z]/.test(newPassword)}>Uma letra minúscula</Rule>
+          <Rule valid={/[0-9]/.test(newPassword)}>Um número</Rule>
+        </PasswordRules>
         {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
         <Button type="submit">Alterar Senha</Button>
       </Form>

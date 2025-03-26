@@ -3,6 +3,8 @@ import { auth } from '../services/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { db } from '../services/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 const Container = styled.div`
   display: flex;
@@ -13,8 +15,6 @@ const Container = styled.div`
 
 const Title = styled.h1`
   font-size: 24px;
-  margin-bottom: 20px;
-`;
 
 const Form = styled.form`
   display: flex;
@@ -49,6 +49,23 @@ const StyledLink = styled(Link)`
 
   &:hover {
     text-decoration: underline;
+  }
+`;
+
+const PasswordRules = styled.div`
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+`;
+
+const Rule = styled.p`
+  margin: 5px 0;
+  color: ${props => props.valid ? 'green' : '#666'};
+  &::before {
+    content: '✓ ';
+    color: ${props => props.valid ? 'green' : '#ccc'};
   }
 `;
 
@@ -115,6 +132,16 @@ function Register() {
     }
   };
 
+  const validatePassword = (pass) => {
+    setPassword(pass);
+    if (!pass) {
+      setPasswordError('Por favor, insira uma senha.');
+      return;
+    }
+    // Limpa o erro se houver validações em andamento
+    setPasswordError('');
+  };
+
   return (
     <Container>
       <Title>Criar Conta</Title>
@@ -130,8 +157,15 @@ function Register() {
           type="password"
           placeholder="Senha"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => validatePassword(e.target.value)}
         />
+        <PasswordRules>
+          <p>Sua senha deve conter:</p>
+          <Rule valid={password.length >= 6}>Mínimo de 6 caracteres</Rule>
+          <Rule valid={/[A-Z]/.test(password)}>Uma letra maiúscula</Rule>
+          <Rule valid={/[a-z]/.test(password)}>Uma letra minúscula</Rule>
+          <Rule valid={/[0-9]/.test(password)}>Um número</Rule>
+        </PasswordRules>
         {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
         <Button type="submit">Cadastrar</Button>
       </Form>
