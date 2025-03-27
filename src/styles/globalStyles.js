@@ -3,8 +3,10 @@ import { createGlobalStyle } from 'styled-components';
 export const GlobalStyle = createGlobalStyle`
   :root {
     --primary: #2E7D32;
+    --primary-hover: #1B5E20;
     --secondary: #1565C0;
     --danger: #C62828;
+    --danger-hover: #B71C1C;
     --warning: #F9A825;
     --success: #2E7D32;
     --background: #F5F5F5;
