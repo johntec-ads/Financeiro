@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useAuth } from '../context/AuthContext';
 
 const FormContainer = styled.div`
   background-color: var(--card-bg);
@@ -79,6 +80,7 @@ const Button = styled.button`
 `;
 
 const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
+  const { currentUser } = useAuth();
   const [type, setType] = useState('receita');
   const [category, setCategory] = useState('');
   const [value, setValue] = useState('');
@@ -94,13 +96,15 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
       return;
     }
 
-    addTransaction({
+    const transaction = {
       type,
       category,
       value: parseFloat(value),
       date,
       description,
-    });
+    };
+
+    addTransaction(transaction);
 
     // Limpar o formulário
     setCategory('');

@@ -130,7 +130,12 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                 <Td>{transaction.category}</Td>
                 <Td>
                   <ValueText type={transaction.type}>
-                    {transaction.value}
+                    {typeof transaction.value === 'number' 
+                      ? new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(transaction.value)
+                      : transaction.value}
                   </ValueText>
                 </Td>
                 <Td>{transaction.date}</Td>
@@ -145,7 +150,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
           ) : (
             <tr>
               <Td colSpan="6" style={{ textAlign: 'center' }}>
-                Nenhuma transação encontrada
+                {loading ? 'Carregando...' : 'Nenhuma transação encontrada'}
               </Td>
             </tr>
           )}
