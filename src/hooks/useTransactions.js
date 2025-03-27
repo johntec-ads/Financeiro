@@ -16,29 +16,43 @@ const useTransactions = (selectedMonth, selectedYear) => {
     }
 
     setLoading(true);
-    const transactionsCollection = collection(db, 'transactions');
+    const transactionsRef = collection(db, 'transactions');
 
-    // Construir a query para filtrar por userId e mês/ano
+    // Simplificando a query para debug
     const q = query(
-      transactionsCollection,
+      transactionsRef,
       where('userId', '==', currentUser.uid),
-      where('month', '==', selectedMonth),
-      where('year', '==', selectedYear),
-      orderBy('createdAt', 'desc') // Ordenar por data de criação
+      where('month', '==', parseInt(selectedMonth)),
+      where('year', '==', parseInt(selectedYear)),
+      orderBy('createdAt', 'desc')
     );
 
-    // Listener em tempo real
-    const unsubscribe = onSnapshot(q,
+    const unsubscribe = onSnapshot(
+      q,
       (snapshot) => {
-        const fetchedTransactions = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          date: doc.data().date, // Manter como string
-        }));
+        console.log('Dados recebidos:', snapshot.docs.map(doc => doc.data())); // Debug
+        const fetchedTransactions = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            // Garantindo que o valor seja um número antes de formatar
+            value: typeof data.value === 'number' 
+              ? new Intl.NumberFormat('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL'
+                }).format(data.value)
+              : 'R$ 0,00',
+            // Garantindo que a data seja uma string válida
+            date: data.date ? new Date(data.date).toLocaleDateString('pt-BR') : ''
+          };
+        });
+        console.log('Transações formatadas:', fetchedTransactions); // Debug
         setTransactions(fetchedTransactions);
         setLoading(false);
       },
       (error) => {
+        console.error('Erro ao carregar transações:', error);
         setError(error);
         setLoading(false);
       }
@@ -47,36 +61,62 @@ const useTransactions = (selectedMonth, selectedYear) => {
     return () => unsubscribe(); // Limpar o listener ao desmontar
   }, [currentUser, selectedMonth, selectedYear]);
 
-  // Funções para adicionar, atualizar e excluir transações
   const addTransaction = async (transaction) => {
     try {
-      await addDoc(collection(db, 'transactions'), {
-        ...transaction,
+      // Garantindo que os dados estejam no formato correto
+      const transactionData = {
         userId: currentUser.uid,
-        createdAt: serverTimestamp(),
-        month: selectedMonth, // Salvar mês
-        year: selectedYear,   // Salvar ano
-      });
+        type: transaction.type,
+        category: transaction.category,
+        value: parseFloat(transaction.value),
+        date: transaction.date,
+        description: transaction.description || '',
+        month: parseInt(selectedMonth),
+        year: parseInt(selectedYear),
+        createdAt: serverTimestamp()
+      };
+
+      console.log('Adicionando transação:', transactionData); // Debug
+
+      await addDoc(collection(db, 'transactions'), transactionData);
     } catch (err) {
-      setError(err);
+      console.error('Erro ao adicionar transação:', err);
+      throw err;
     }
   };
 
   const updateTransaction = async (id, updates) => {
     try {
-      const transactionDoc = doc(db, 'transactions', id);
-      await updateDoc(transactionDoc, updates);
+      const transactionRef = doc(db, 'transactions', id);
+      
+      // Adiciona campos de auditoria na atualização
+      const updateData = {
+        ...updates,
+        updatedAt: serverTimestamp(),
+        updatedBy: currentUser.email
+      };
+
+      await updateDoc(transactionRef, updateData);
     } catch (err) {
+      console.error('Erro ao atualizar transação:', err);
       setError(err);
+      throw err;
     }
   };
 
   const deleteTransaction = async (id) => {
     try {
-      const transactionDoc = doc(db, 'transactions', id);
-      await deleteDoc(transactionDoc);
+      // Ao invés de deletar, podemos marcar como inativa
+      const transactionRef = doc(db, 'transactions', id);
+      await updateDoc(transactionRef, {
+        status: 'inactive',
+        updatedAt: serverTimestamp(),
+        updatedBy: currentUser.email
+      });
     } catch (err) {
+      console.error('Erro ao deletar transação:', err);
       setError(err);
+      throw err;
     }
   };
 

@@ -11,6 +11,9 @@ export const GlobalStyle = createGlobalStyle`
     --text: #333333;
     --card-bg: #FFFFFF;
     --border: #E0E0E0;
+    --mobile-padding: 1rem;
+    --tablet-padding: 1.5rem;
+    --desktop-padding: 2rem;
   }
 
   * {
@@ -32,6 +35,18 @@ export const GlobalStyle = createGlobalStyle`
 
     &:hover {
       filter: brightness(0.9);
+    }
+  }
+
+  @media (max-width: 768px) {
+    html {
+      font-size: 87.5%; // 14px
+    }
+  }
+
+  @media (max-width: 480px) {
+    html {
+      font-size: 81.25%; // 13px
     }
   }
 `;

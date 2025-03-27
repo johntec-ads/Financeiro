@@ -7,6 +7,11 @@ const FormContainer = styled.div`
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    border-radius: 8px;
+  }
 `;
 
 const Form = styled.form`
@@ -14,6 +19,11 @@ const Form = styled.form`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1rem;
   width: 100%;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 `;
 
 const FormGroup = styled.div`
@@ -61,6 +71,11 @@ const Button = styled.button`
   font-weight: 500;
   width: 100%;
   margin-top: 1rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin-top: 0.5rem;
+  }
 `;
 
 const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {

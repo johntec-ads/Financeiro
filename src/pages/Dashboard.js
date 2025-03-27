@@ -11,7 +11,7 @@ const DashboardContainer = styled.div`
   padding: 2rem;
 
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: var(--mobile-padding);
   }
 `;
 
@@ -20,6 +20,11 @@ const Title = styled.h1`
   margin-bottom: 2rem;
   font-size: 2rem;
   text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const FilterContainer = styled.div`
@@ -28,6 +33,11 @@ const FilterContainer = styled.div`
   margin-bottom: 2rem;
   justify-content: center;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 `;
 
 const Select = styled.select`
@@ -42,6 +52,11 @@ const Select = styled.select`
     outline: 2px solid var(--primary);
     border-color: transparent;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: auto;
+  }
 `;
 
 const Dashboard = () => {
@@ -52,6 +67,8 @@ const Dashboard = () => {
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]
   const years = [2023, 2024, 2025, 2026]; // Adicione mais anos conforme necessário
+
+  console.log('Estado atual:', { selectedMonth, selectedYear, transactions }); // Debug
 
   return (
     <DashboardContainer>
@@ -74,7 +91,13 @@ const Dashboard = () => {
       <TransactionForm addTransaction={addTransaction} selectedMonth={selectedMonth} selectedYear={selectedYear} />
       {loading && <p>Carregando transações...</p>}
       {error && <p>Erro: {error.message}</p>}
-      <TransactionList transactions={transactions} deleteTransaction={deleteTransaction} updateTransaction={updateTransaction} />
+      <TransactionList 
+        transactions={transactions} 
+        deleteTransaction={deleteTransaction} 
+        updateTransaction={updateTransaction}
+        loading={loading}
+        error={error}
+      />
     </DashboardContainer>
   );
 };

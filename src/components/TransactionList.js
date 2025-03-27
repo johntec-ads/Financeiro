@@ -6,6 +6,11 @@ const TableContainer = styled.div`
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: auto;
+
+  @media (max-width: 768px) {
+    margin: 0 -1rem;
+    border-radius: 0;
+  }
 `;
 
 const Table = styled.table`
@@ -13,6 +18,11 @@ const Table = styled.table`
   border-collapse: separate;
   border-spacing: 0;
   min-width: 600px;
+
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+    min-width: auto;
+  }
 `;
 
 const Th = styled.th`
@@ -22,12 +32,26 @@ const Th = styled.th`
   font-weight: 500;
   color: var(--text);
   border-bottom: 2px solid var(--border);
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 0.5rem;
+    &:nth-child(4), &:nth-child(5) { // esconde colunas data e descrição
+      display: none;
+    }
+  }
 `;
 
 const Td = styled.td`
   padding: 1rem;
   border-bottom: 1px solid var(--border);
   color: var(--text);
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 0.5rem;
+    &:nth-child(4), &:nth-child(5) { // esconde colunas data e descrição
+      display: none;
+    }
+  }
 `;
 
 const DeleteButton = styled.button`
@@ -44,7 +68,47 @@ const ValueText = styled.span`
   font-weight: 500;
 `;
 
-const TransactionList = ({ transactions, deleteTransaction, updateTransaction }) => {
+const LoadingContainer = styled.div`
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const ErrorContainer = styled(LoadingContainer)`
+  color: var(--danger);
+`;
+
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  margin: 1rem 0;
+`;
+
+const ErrorMessage = styled(LoadingMessage)`
+  color: var(--danger);
+`;
+
+const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
+  if (loading) {
+    return <LoadingMessage>Carregando transações...</LoadingMessage>;
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage>
+        <h3>Erro ao carregar transações</h3>
+        <p>O índice está sendo criado. Por favor, aguarde alguns minutos e tente novamente.</p>
+        <p>Se o erro persistir, recarregue a página.</p>
+      </ErrorMessage>
+    );
+  }
+
+  console.log('Renderizando transações:', transactions); // Debug
+
   return (
     <TableContainer>
       <Table>
@@ -59,18 +123,32 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction })
           </tr>
         </thead>
         <tbody>
-          {transactions.map(transaction => (
-            <tr key={transaction.id}>
-              <Td>{transaction.type}</Td>
-              <Td>{transaction.category}</Td>
-              <Td><ValueText type={transaction.type}>{transaction.value}</ValueText></Td>
-              <Td>{transaction.date}</Td>
-              <Td>{transaction.description}</Td>
-              <Td>
-                <DeleteButton onClick={() => deleteTransaction(transaction.id)}>Excluir</DeleteButton>
+          {transactions && transactions.length > 0 ? (
+            transactions.map(transaction => (
+              <tr key={transaction.id}>
+                <Td>{transaction.type}</Td>
+                <Td>{transaction.category}</Td>
+                <Td>
+                  <ValueText type={transaction.type}>
+                    {transaction.value}
+                  </ValueText>
+                </Td>
+                <Td>{transaction.date}</Td>
+                <Td>{transaction.description}</Td>
+                <Td>
+                  <DeleteButton onClick={() => deleteTransaction(transaction.id)}>
+                    Excluir
+                  </DeleteButton>
+                </Td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <Td colSpan="6" style={{ textAlign: 'center' }}>
+                Nenhuma transação encontrada
               </Td>
             </tr>
-          ))}
+          )}
         </tbody>
       </Table>
     </TableContainer>

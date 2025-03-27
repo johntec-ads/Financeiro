@@ -6,6 +6,11 @@ const SummaryContainer = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 `;
 
 const SummaryCard = styled.div`
@@ -13,12 +18,23 @@ const SummaryCard = styled.div`
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 const Title = styled.h3`
   color: var(--text);
   font-size: 1rem;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 0;
+  }
 `;
 
 const Value = styled.p`
