@@ -1,62 +1,82 @@
-import { useEffect, useState } from 'react';
-import { auth } from '../services/firebase';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import TransactionForm from '../components/TransactionForm';
+import TransactionList from '../components/TransactionList';
+import Summary from '../components/Summary';
+import useTransactions from '../hooks/useTransactions';
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-`;
+const DashboardContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
 
-const Title = styled.h1`
-  font-size: 24px;
-  margin-bottom: 20px;
-`;
-
-const Button = styled.button`
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 5px 0;  // Adicionar margem vertical
-
-  &:hover {
-    background-color: #0056b3;
+  @media (max-width: 768px) {
+    padding: 1rem;
   }
 `;
 
-function Dashboard() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+const Title = styled.h1`
+  color: var(--primary);
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  text-align: center;
+`;
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      if (user) {
-        setUser(user);
-      } else {
-        navigate('/');
-      }
-    });
+const FilterContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+`;
 
-    return () => unsubscribe();
-  }, [navigate]);
+const Select = styled.select`
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--card-bg);
+  min-width: 150px;
+  font-size: 1rem;
+  
+  &:focus {
+    outline: 2px solid var(--primary);
+    border-color: transparent;
+  }
+`;
 
-  const handleLogout = () => {
-    auth.signOut();
-    navigate('/');
-  };
+const Dashboard = () => {
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Mês atual
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());   // Ano atual
+
+  const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactions(selectedMonth, selectedYear);
+
+  const months = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]
+  const years = [2023, 2024, 2025, 2026]; // Adicione mais anos conforme necessário
 
   return (
-    <Container>
-      <Title>Dashboard</Title>
-      <p>Bem vindo, {user?.email}</p>
-      <Button onClick={handleLogout}>Sair</Button>
-    </Container>
+    <DashboardContainer>
+      <Title>Controle Financeiro</Title>
+
+      <FilterContainer>
+        <Select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+          {months.map(month => (
+            <option key={month} value={month}>{month}</option>
+          ))}
+        </Select>
+        <Select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+          {years.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </Select>
+      </FilterContainer>
+
+      <Summary transactions={transactions} />
+      <TransactionForm addTransaction={addTransaction} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+      {loading && <p>Carregando transações...</p>}
+      {error && <p>Erro: {error.message}</p>}
+      <TransactionList transactions={transactions} deleteTransaction={deleteTransaction} updateTransaction={updateTransaction} />
+    </DashboardContainer>
   );
-}
+};
 
 export default Dashboard;
