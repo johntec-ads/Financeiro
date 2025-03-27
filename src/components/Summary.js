@@ -48,29 +48,63 @@ const Value = styled.p`
 `;
 
 const Summary = ({ transactions }) => {
-  const totalReceitas = transactions
-    .filter(transaction => transaction.type === 'receita')
-    .reduce((acc, transaction) => acc + transaction.value, 0);
+  const calculateTotals = () => {
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      return {
+        receitas: 0,
+        despesas: 0,
+        saldo: 0
+      };
+    }
 
-  const totalDespesas = transactions
-    .filter(transaction => transaction.type === 'despesa')
-    .reduce((acc, transaction) => acc + transaction.value, 0);
+    return transactions.reduce((acc, transaction) => {
+      const value = Number(transaction.value) || 0;
+      
+      if (transaction.type === 'receita') {
+        acc.receitas += value;
+      } else if (transaction.type === 'despesa') {
+        acc.despesas += value;
+      }
+      
+      acc.saldo = acc.receitas - acc.despesas;
+      return acc;
+    }, {
+      receitas: 0,
+      despesas: 0,
+      saldo: 0
+    });
+  };
 
-  const saldo = totalReceitas - totalDespesas;
+  const { receitas, despesas, saldo } = calculateTotals();
 
   return (
     <SummaryContainer>
       <SummaryCard>
         <Title>Total de Receitas</Title>
-        <Value type="receita">R$ {totalReceitas.toFixed(2)}</Value>
+        <Value type="receita">
+          {new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(receitas)}
+        </Value>
       </SummaryCard>
       <SummaryCard>
         <Title>Total de Despesas</Title>
-        <Value type="despesa">R$ {totalDespesas.toFixed(2)}</Value>
+        <Value type="despesa">
+          {new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(despesas)}
+        </Value>
       </SummaryCard>
       <SummaryCard>
         <Title>Saldo</Title>
-        <Value value={saldo}>R$ {saldo.toFixed(2)}</Value>
+        <Value value={saldo}>
+          {new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(saldo)}
+        </Value>
       </SummaryCard>
     </SummaryContainer>
   );
