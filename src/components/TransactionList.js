@@ -93,6 +93,12 @@ const ErrorMessage = styled(LoadingMessage)`
 `;
 
 const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
+  const handleDelete = (id) => {
+    if (window.confirm('Tem certeza que deseja excluir esta transação?')) {
+      deleteTransaction(id);
+    }
+  };
+
   if (loading) {
     return <LoadingMessage>Carregando transações...</LoadingMessage>;
   }
@@ -141,7 +147,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                 <Td>{transaction.date}</Td>
                 <Td>{transaction.description}</Td>
                 <Td>
-                  <DeleteButton onClick={() => deleteTransaction(transaction.id)}>
+                  <DeleteButton onClick={() => handleDelete(transaction.id)}>
                     Excluir
                   </DeleteButton>
                 </Td>

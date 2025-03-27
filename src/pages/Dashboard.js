@@ -6,6 +6,7 @@ import Summary from '../components/Summary';
 import useTransactions from '../hooks/useTransactions';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../services/firebase'; // Adicionar esta importação
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
