@@ -111,7 +111,12 @@ const Dashboard = () => {
 
   const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactions(selectedMonth, selectedYear);
 
-  const months = Array.from({ length: 12 }, (_, i) => i + 1); // [1, 2, ..., 12]
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril',
+    'Maio', 'Junho', 'Julho', 'Agosto',
+    'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
   const years = [2023, 2024, 2025, 2026]; // Adicione mais anos conforme necessário
 
   console.log('Estado atual:', { selectedMonth, selectedYear, transactions }); // Debug
@@ -131,8 +136,10 @@ const Dashboard = () => {
 
       <FilterContainer>
         <Select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-          {months.map(month => (
-            <option key={month} value={month}>{month}</option>
+          {monthNames.map((month, index) => (
+            <option key={index + 1} value={index + 1}>
+              {month}
+            </option>
           ))}
         </Select>
         <Select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
