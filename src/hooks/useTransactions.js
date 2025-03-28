@@ -85,9 +85,9 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
   const updateTransaction = async (id, updates) => {
     try {
-      const transactionRef = doc(db, 'transactions', id);
+      // Corrigindo o nome da coleção para 'transacoes'
+      const transactionRef = doc(db, 'transacoes', id);
       
-      // Adiciona campos de auditoria na atualização
       const updateData = {
         ...updates,
         updatedAt: serverTimestamp(),
@@ -104,13 +104,9 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
   const deleteTransaction = async (id) => {
     try {
-      // Ao invés de deletar, podemos marcar como inativa
-      const transactionRef = doc(db, 'transactions', id);
-      await updateDoc(transactionRef, {
-        status: 'inactive',
-        updatedAt: serverTimestamp(),
-        updatedBy: currentUser.email
-      });
+      // Corrigindo o nome da coleção para 'transacoes' e usando deleteDoc
+      const transactionRef = doc(db, 'transacoes', id);
+      await deleteDoc(transactionRef);
     } catch (err) {
       console.error('Erro ao deletar transação:', err);
       setError(err);
