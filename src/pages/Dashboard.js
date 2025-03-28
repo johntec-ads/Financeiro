@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
@@ -6,7 +6,7 @@ import Summary from '../components/Summary';
 import useTransactions from '../hooks/useTransactions';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../services/firebase'; // Adicionar esta importação
+import { auth } from '../services/firebase';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -85,7 +85,7 @@ const Button = styled.button`
 const LogoutButton = styled(Button)`
   margin-top: 2rem;
   width: 100%;
-  background-color: var(--danger); // Mudando para vermelho para indicar ação de sair
+  background-color: var(--danger);
   
   &:hover {
     opacity: 0.9;
@@ -104,11 +104,23 @@ const ContentContainer = styled.div`
   }
 `;
 
+const LoadingMessage = styled.p`
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--primary);
+`;
+
 const Dashboard = () => {
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Mês atual
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());   // Ano atual
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
 
   const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactions(selectedMonth, selectedYear);
 
@@ -118,52 +130,47 @@ const Dashboard = () => {
     'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
 
-  const years = [2023, 2024, 2025, 2026]; // Adicione mais anos conforme necessário
-
-  console.log('Estado atual:', { selectedMonth, selectedYear, transactions }); // Debug
-
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      navigate('/');
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-    }
-  };
+  const years = [2023, 2024, 2025, 2026];
 
   return (
     <DashboardContainer>
-      <Title>Controle Financeiro</Title>
+      {currentUser ? (
+        <>
+          <Title>Controle Financeiro</Title>
 
-      <FilterContainer>
-        <Select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
-          {monthNames.map((month, index) => (
-            <option key={index + 1} value={index + 1}>
-              {month}
-            </option>
-          ))}
-        </Select>
-        <Select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-          {years.map(year => (
-            <option key={year} value={year}>{year}</option>
-          ))}
-        </Select>
-      </FilterContainer>
+          <FilterContainer>
+            <Select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+              {monthNames.map((month, index) => (
+                <option key={index + 1} value={index + 1}>
+                  {month}
+                </option>
+              ))}
+            </Select>
+            <Select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+              {years.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </Select>
+          </FilterContainer>
 
-      <ContentContainer>
-        <Summary transactions={transactions} />
-        <TransactionForm addTransaction={addTransaction} selectedMonth={selectedMonth} selectedYear={selectedYear} />
-        {loading && <p>Carregando transações...</p>}
-        {error && <p>Erro: {error.message}</p>}
-        <TransactionList 
-          transactions={transactions} 
-          deleteTransaction={deleteTransaction} 
-          updateTransaction={updateTransaction}
-          loading={loading}
-          error={error}
-        />
-        <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
-      </ContentContainer>
+          <ContentContainer>
+            <Summary transactions={transactions} />
+            <TransactionForm addTransaction={addTransaction} selectedMonth={selectedMonth} selectedYear={selectedYear} />
+            {loading && <p>Carregando transações...</p>}
+            {error && <p>Erro: {error.message}</p>}
+            <TransactionList 
+              transactions={transactions} 
+              deleteTransaction={deleteTransaction} 
+              updateTransaction={updateTransaction}
+              loading={loading}
+              error={error}
+            />
+            <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
+          </ContentContainer>
+        </>
+      ) : (
+        <LoadingMessage>Carregando...</LoadingMessage>
+      )}
     </DashboardContainer>
   );
 };

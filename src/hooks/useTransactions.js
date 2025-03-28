@@ -21,43 +21,45 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
     const q = query(
       transactionsRef,
-      where('userId', '==', currentUser.uid)
+      where('userId', '==', currentUser.uid),
+      orderBy('createdAt', 'desc') // Ordenar por data de criação
     );
 
     const unsubscribe = onSnapshot(
       q,
-      (snapshot) => {
-        const fetchedTransactions = snapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }))
-          .filter(transaction => {
-            if (!transaction.date) return false;
-            
-            const transactionDate = new Date(transaction.date);
-            const transactionMonth = transactionDate.getMonth() + 1;
-            const transactionYear = transactionDate.getFullYear();
-            
-            return (
-              transactionMonth === parseInt(selectedMonth) &&
-              transactionYear === parseInt(selectedYear)
-            );
-          });
+      {
+        next: (snapshot) => {
+          const fetchedTransactions = snapshot.docs
+            .map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }))
+            .filter(transaction => {
+              if (!transaction.date) return false;
+              
+              const transactionDate = new Date(transaction.date);
+              const transactionMonth = transactionDate.getMonth() + 1;
+              const transactionYear = transactionDate.getFullYear();
+              
+              return (
+                transactionMonth === parseInt(selectedMonth) &&
+                transactionYear === parseInt(selectedYear)
+              );
+            });
 
-        console.log('Transações filtradas:', fetchedTransactions);
-        setTransactions(fetchedTransactions);
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Erro ao buscar transações:', error);
-        setError(error);
-        setLoading(false);
+          setTransactions(fetchedTransactions);
+          setLoading(false);
+        },
+        error: (error) => {
+          console.error('Erro ao buscar transações:', error);
+          setError(error);
+          setLoading(false);
+        }
       }
     );
 
     return () => unsubscribe();
-  }, [currentUser, selectedMonth, selectedYear]);
+  }, [currentUser?.uid, selectedMonth, selectedYear]); // Adicionado currentUser.uid como dependência
 
   const addTransaction = async (transaction) => {
     if (!currentUser?.uid) {
