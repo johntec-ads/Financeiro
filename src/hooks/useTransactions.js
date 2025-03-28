@@ -17,49 +17,53 @@ const useTransactions = (selectedMonth, selectedYear) => {
     }
 
     setLoading(true);
+    setError(null); // Limpa o erro anterior
+
     const transactionsRef = collection(db, 'transacoes');
 
-    const q = query(
-      transactionsRef,
-      where('userId', '==', currentUser.uid),
-      orderBy('createdAt', 'desc') // Ordenar por data de criação
-    );
+    try {
+      const q = query(
+        transactionsRef,
+        where('userId', '==', currentUser.uid),
+        orderBy('createdAt', 'desc')
+      );
 
-    const unsubscribe = onSnapshot(
-      q,
-      {
-        next: (snapshot) => {
-          const fetchedTransactions = snapshot.docs
-            .map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }))
-            .filter(transaction => {
-              if (!transaction.date) return false;
-              
-              const transactionDate = new Date(transaction.date);
-              const transactionMonth = transactionDate.getMonth() + 1;
-              const transactionYear = transactionDate.getFullYear();
-              
-              return (
-                transactionMonth === parseInt(selectedMonth) &&
-                transactionYear === parseInt(selectedYear)
-              );
-            });
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const fetchedTransactions = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          })).filter(transaction => {
+            if (!transaction.date) return false;
+
+            const transactionDate = new Date(transaction.date);
+            const transactionMonth = transactionDate.getMonth() + 1;
+            const transactionYear = transactionDate.getFullYear();
+
+            return (
+              transactionMonth === parseInt(selectedMonth) &&
+              transactionYear === parseInt(selectedYear)
+            );
+          });
 
           setTransactions(fetchedTransactions);
           setLoading(false);
         },
-        error: (error) => {
+        (error) => {
           console.error('Erro ao buscar transações:', error);
           setError(error);
           setLoading(false);
         }
-      }
-    );
+      );
 
-    return () => unsubscribe();
-  }, [currentUser?.uid, selectedMonth, selectedYear]); // Adicionado currentUser.uid como dependência
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Erro ao configurar listener:', error);
+      setError(error);
+      setLoading(false);
+    }
+  }, [currentUser?.uid, selectedMonth, selectedYear]);
 
   const addTransaction = async (transaction) => {
     if (!currentUser?.uid) {
@@ -87,7 +91,6 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
   const updateTransaction = async (id, updates) => {
     try {
-      // Corrigindo o nome da coleção para 'transacoes'
       const transactionRef = doc(db, 'transacoes', id);
       
       const updateData = {
@@ -106,7 +109,6 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
   const deleteTransaction = async (id) => {
     try {
-      // Corrigindo o nome da coleção para 'transacoes' e usando deleteDoc
       const transactionRef = doc(db, 'transacoes', id);
       await deleteDoc(transactionRef);
     } catch (err) {
