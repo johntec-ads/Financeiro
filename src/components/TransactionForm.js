@@ -100,11 +100,13 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
     const transaction = {
       type,
       category,
-      value: parseFloat(value),
+      valor: parseFloat(value), // Mudando para 'valor' para manter consistência
+      value: parseFloat(value), // Mantendo 'value' para compatibilidade
       date,
       description,
     };
 
+    console.log('Nova transação:', transaction); // Debug
     addTransaction(transaction);
 
     // Limpar o formulário
