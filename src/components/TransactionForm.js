@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../context/AuthContext';
+import { expenseCategories, incomeCategories } from '../constants/categories';
 
 const FormContainer = styled.div`
   background-color: var(--card-bg);
@@ -126,11 +127,17 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
         
         <FormGroup>
           <Label>Categoria</Label>
-          <Input
-            type="text"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          />
+          <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="">Selecione uma categoria</option>
+            {type === 'receita' 
+              ? incomeCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))
+              : expenseCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))
+            }
+          </Select>
         </FormGroup>
 
         <FormGroup>

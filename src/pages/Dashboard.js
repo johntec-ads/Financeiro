@@ -7,6 +7,7 @@ import useTransactions from '../hooks/useTransactions';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase';
+import NavBar from '../components/NavBar';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -145,6 +146,7 @@ const Dashboard = () => {
     <DashboardContainer>
       {currentUser ? (
         <>
+          <NavBar />
           <Title>Controle Financeiro</Title>
 
           <FilterContainer>
