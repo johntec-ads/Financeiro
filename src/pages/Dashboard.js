@@ -114,6 +114,7 @@ const LoadingMessage = styled.p`
 const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [logoutLoading, setLogoutLoading] = useState(false); // Adicionado estado para feedback de logout
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -126,11 +127,14 @@ const Dashboard = () => {
   const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactions(selectedMonth, selectedYear);
 
   const handleLogout = async () => {
+    setLogoutLoading(true); // Inicia o estado de carregamento
     try {
       await auth.signOut();
       navigate('/');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+    } finally {
+      setLogoutLoading(false); // Finaliza o estado de carregamento
     }
   };
 
@@ -150,14 +154,22 @@ const Dashboard = () => {
           <Title>Controle Financeiro</Title>
 
           <FilterContainer>
-            <Select value={selectedMonth} onChange={(e) => setSelectedMonth(parseInt(e.target.value))}>
+            <Select 
+              value={selectedMonth} 
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              aria-label="Selecionar mês"
+            >
               {monthNames.map((month, index) => (
                 <option key={index + 1} value={index + 1}>
                   {month}
                 </option>
               ))}
             </Select>
-            <Select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+            <Select 
+              value={selectedYear} 
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              aria-label="Selecionar ano"
+            >
               {years.map(year => (
                 <option key={year} value={year}>{year}</option>
               ))}
@@ -168,7 +180,7 @@ const Dashboard = () => {
             <Summary transactions={transactions} />
             <TransactionForm addTransaction={addTransaction} selectedMonth={selectedMonth} selectedYear={selectedYear} />
             {loading && <p>Carregando transações...</p>}
-            {error && <p>Erro: {error.message}</p>}
+            {error && <p>Erro ao carregar transações.</p>}
             <TransactionList 
               transactions={transactions} 
               deleteTransaction={deleteTransaction} 
@@ -176,11 +188,19 @@ const Dashboard = () => {
               loading={loading}
               error={error}
             />
-            <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
+            <LogoutButton 
+              onClick={handleLogout} 
+              disabled={logoutLoading} 
+              aria-busy={logoutLoading}
+            >
+              {logoutLoading ? 'Saindo...' : 'Sair'}
+            </LogoutButton>
           </ContentContainer>
         </>
       ) : (
-        <LoadingMessage>Carregando...</LoadingMessage>
+        <LoadingMessage role="status" aria-live="polite">
+          Carregando...
+        </LoadingMessage>
       )}
     </DashboardContainer>
   );

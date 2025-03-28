@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   Chart as ChartJS,
@@ -42,36 +42,63 @@ const TotalValue = styled.p`
   color: ${props => props.type === 'receita' ? 'var(--success)' : 'var(--danger)'};
 `;
 
+const CategoryFilter = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+`;
+
+const Checkbox = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text);
+`;
+
 const Charts = ({ transactions }) => {
+  const [selectedCategories, setSelectedCategories] = useState({
+    receita: incomeCategories.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
+    despesa: expenseCategories.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
+  });
+
+  const toggleCategory = (type, category) => {
+    setSelectedCategories(prev => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [category]: !prev[type][category],
+      },
+    }));
+  };
+
   const calculateCategoryTotals = (type) => {
-    console.log('Transações recebidas:', transactions); // Debug
-    
     if (!Array.isArray(transactions)) {
-      console.log('Transações não é um array');
       return { totals: {}, total: 0 };
     }
 
     const categories = type === 'receita' ? incomeCategories : expenseCategories;
     const totals = {};
     let total = 0;
-    
+
     categories.forEach(cat => {
+      if (!selectedCategories[type][cat]) return; // Ignorar categorias desmarcadas
+
       const categoryTotal = transactions
         .filter(t => t.type === type && t.category === cat)
         .reduce((sum, t) => {
-          const valor = Number(t.valor) || Number(t.value) || 0;
+          const valor = Number(t.value) || 0; // Garantir que o campo 'value' seja usado corretamente
           return sum + valor;
         }, 0);
-      
-      console.log(`Categoria ${cat}:`, categoryTotal); // Debug
-      
+
       if (categoryTotal > 0) {
         totals[cat] = categoryTotal;
         total += categoryTotal;
       }
     });
 
-    console.log(`Total ${type}:`, total); // Debug
     return { totals, total };
   };
 
@@ -141,23 +168,54 @@ const Charts = ({ transactions }) => {
   const { total: totalReceitas } = calculateCategoryTotals('receita');
 
   return (
-    <ChartsGrid>
-      <ChartContainer>
-        <ChartTitle>Despesas por Categoria</ChartTitle>
-        <Pie data={createChartData('despesa')} options={options} />
-        <TotalValue type="despesa">
-          Total: R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-        </TotalValue>
-      </ChartContainer>
-      
-      <ChartContainer>
-        <ChartTitle>Receitas por Categoria</ChartTitle>
-        <Pie data={createChartData('receita')} options={options} />
-        <TotalValue type="receita">
-          Total: R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-        </TotalValue>
-      </ChartContainer>
-    </ChartsGrid>
+    <>
+      <CategoryFilter>
+        <div>
+          <h4>Receitas</h4>
+          {incomeCategories.map(cat => (
+            <Checkbox key={cat}>
+              <input
+                type="checkbox"
+                checked={selectedCategories.receita[cat]}
+                onChange={() => toggleCategory('receita', cat)}
+              />
+              {cat}
+            </Checkbox>
+          ))}
+        </div>
+        <div>
+          <h4>Despesas</h4>
+          {expenseCategories.map(cat => (
+            <Checkbox key={cat}>
+              <input
+                type="checkbox"
+                checked={selectedCategories.despesa[cat]}
+                onChange={() => toggleCategory('despesa', cat)}
+              />
+              {cat}
+            </Checkbox>
+          ))}
+        </div>
+      </CategoryFilter>
+
+      <ChartsGrid>
+        <ChartContainer>
+          <ChartTitle>Despesas por Categoria</ChartTitle>
+          <Pie data={createChartData('despesa')} options={options} />
+          <TotalValue type="despesa">
+            Total: R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </TotalValue>
+        </ChartContainer>
+        
+        <ChartContainer>
+          <ChartTitle>Receitas por Categoria</ChartTitle>
+          <Pie data={createChartData('receita')} options={options} />
+          <TotalValue type="receita">
+            Total: R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </TotalValue>
+        </ChartContainer>
+      </ChartsGrid>
+    </>
   );
 };
 

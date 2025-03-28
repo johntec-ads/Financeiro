@@ -17,7 +17,7 @@ const useTransactions = (selectedMonth, selectedYear) => {
     }
 
     setLoading(true);
-    setError(null); // Limpa o erro anterior
+    setError(null);
 
     const transactionsRef = collection(db, 'transacoes');
 
@@ -51,7 +51,6 @@ const useTransactions = (selectedMonth, selectedYear) => {
           setLoading(false);
         },
         (error) => {
-          console.error('Erro ao buscar transações:', error);
           setError(error);
           setLoading(false);
         }
@@ -59,7 +58,6 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
       return () => unsubscribe();
     } catch (error) {
-      console.error('Erro ao configurar listener:', error);
       setError(error);
       setLoading(false);
     }
@@ -81,10 +79,8 @@ const useTransactions = (selectedMonth, selectedYear) => {
         createdAt: serverTimestamp()
       };
 
-      console.log('Adicionando transação:', transactionData);
       await addDoc(collection(db, 'transacoes'), transactionData);
     } catch (err) {
-      console.error('Erro ao adicionar transação:', err);
       throw err;
     }
   };
@@ -101,7 +97,6 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
       await updateDoc(transactionRef, updateData);
     } catch (err) {
-      console.error('Erro ao atualizar transação:', err);
       setError(err);
       throw err;
     }
@@ -112,7 +107,6 @@ const useTransactions = (selectedMonth, selectedYear) => {
       const transactionRef = doc(db, 'transacoes', id);
       await deleteDoc(transactionRef);
     } catch (err) {
-      console.error('Erro ao deletar transação:', err);
       setError(err);
       throw err;
     }

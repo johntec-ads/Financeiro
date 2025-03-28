@@ -86,10 +86,13 @@ const LoadingMessage = styled.div`
   background: var(--card-bg);
   border-radius: 8px;
   margin: 1rem 0;
+  font-size: 1.25rem; /* Melhorar visibilidade */
+  color: var(--primary); /* Cor mais amigável */
 `;
 
 const ErrorMessage = styled(LoadingMessage)`
   color: var(--danger);
+  font-weight: bold; /* Destacar mensagem de erro */
 `;
 
 const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
@@ -100,32 +103,33 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
   };
 
   if (loading) {
-    return <LoadingMessage>Carregando transações...</LoadingMessage>;
+    return (
+      <LoadingMessage role="status" aria-live="polite">
+        Carregando transações, por favor aguarde...
+      </LoadingMessage>
+    );
   }
 
   if (error) {
     return (
-      <ErrorMessage>
+      <ErrorMessage role="alert">
         <h3>Erro ao carregar transações</h3>
-        <p>O índice está sendo criado. Por favor, aguarde alguns minutos e tente novamente.</p>
-        <p>Se o erro persistir, recarregue a página.</p>
+        <p>Por favor, recarregue a página ou tente novamente mais tarde.</p>
       </ErrorMessage>
     );
   }
-
-  console.log('Renderizando transações:', transactions); // Debug
 
   return (
     <TableContainer>
       <Table>
         <thead>
           <tr>
-            <Th>Tipo</Th>
-            <Th>Categoria</Th>
-            <Th>Valor</Th>
-            <Th>Data</Th>
-            <Th>Descrição</Th>
-            <Th>Ações</Th>
+            <Th scope="col">Tipo</Th>
+            <Th scope="col">Categoria</Th>
+            <Th scope="col">Valor</Th>
+            <Th scope="col">Data</Th>
+            <Th scope="col">Descrição</Th>
+            <Th scope="col">Ações</Th>
           </tr>
         </thead>
         <tbody>
@@ -147,7 +151,10 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                 <Td>{transaction.date}</Td>
                 <Td>{transaction.description}</Td>
                 <Td>
-                  <DeleteButton onClick={() => handleDelete(transaction.id)}>
+                  <DeleteButton 
+                    onClick={() => handleDelete(transaction.id)} 
+                    aria-label={`Excluir transação de ${transaction.category} no valor de ${transaction.value}`}
+                  >
                     Excluir
                   </DeleteButton>
                 </Td>
@@ -156,7 +163,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
           ) : (
             <tr>
               <Td colSpan="6" style={{ textAlign: 'center' }}>
-                {loading ? 'Carregando...' : 'Nenhuma transação encontrada'}
+                Nenhuma transação encontrada
               </Td>
             </tr>
           )}

@@ -50,13 +50,13 @@ export const userSettingsSchema = z.object({
 });
 
 export type ValidationError = {
-  path: string[];
+  path: (string | number)[];  // Atualizando o tipo para aceitar números também
   message: string;
 };
 
 export const formatValidationErrors = (errors: z.ZodError): ValidationError[] => {
   return errors.errors.map(error => ({
-    path: error.path,
+    path: error.path.map(p => p.toString()), // Convertendo números para string
     message: error.message
   }));
 };
