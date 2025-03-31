@@ -87,33 +87,38 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const [value, setValue] = useState('');
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setFeedback('');
 
-    // Validação básica
-    if (!category || !value || !date) {
-      alert('Por favor, preencha todos os campos.');
-      return;
+    try {
+      const transaction = {
+        type,
+        category,
+        value: parseFloat(value),
+        date,
+        description
+      };
+
+      await addTransaction(transaction);
+      setFeedback('Transação adicionada com sucesso!');
+      
+      // Limpar formulário
+      setType('receita');
+      setCategory('');
+      setValue('');
+      setDate('');
+      setDescription('');
+    } catch (error) {
+      console.error('Erro ao adicionar transação:', error);
+      setFeedback('Erro ao adicionar transação. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const transaction = {
-      type,
-      category,
-      valor: parseFloat(value), // Mudando para 'valor' para manter consistência
-      value: parseFloat(value), // Mantendo 'value' para compatibilidade
-      date,
-      description,
-    };
-
-    console.log('Nova transação:', transaction); // Debug
-    addTransaction(transaction);
-
-    // Limpar o formulário
-    setCategory('');
-    setValue('');
-    setDate('');
-    setDescription('');
   };
 
   return (
@@ -169,7 +174,14 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
           />
         </FormGroup>
 
-        <Button type="submit">Adicionar Transação</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Adicionando...' : 'Adicionar Transação'}
+        </Button>
+        {feedback && (
+          <p style={{ color: feedback.includes('Erro') ? 'var(--danger)' : 'var(--success)' }}>
+            {feedback}
+          </p>
+        )}
       </Form>
     </FormContainer>
   );

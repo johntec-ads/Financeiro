@@ -3,6 +3,8 @@ import { db } from '../services/firebase';
 import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
+const COLLECTION_NAME = 'transactions'; // Constante para padronizar o nome da coleção
+
 const useTransactions = (selectedMonth, selectedYear) => {
   const { currentUser } = useAuth();
   const [transactions, setTransactions] = useState([]);
@@ -19,14 +21,15 @@ const useTransactions = (selectedMonth, selectedYear) => {
     setLoading(true);
     setError(null);
 
-    const transactionsRef = collection(db, 'transacoes');
-
     try {
+      // Alterando a ordem para match com o índice
       const q = query(
-        transactionsRef,
+        collection(db, COLLECTION_NAME),
         where('userId', '==', currentUser.uid),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'asc') // Mudando para 'asc' para corresponder ao índice
       );
+
+      console.log('Query configurada com índice composto...'); // Debug
 
       const unsubscribe = onSnapshot(
         q,
@@ -58,6 +61,7 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
       return () => unsubscribe();
     } catch (error) {
+      console.error('Erro detalhado:', error); // Debug expandido
       setError(error);
       setLoading(false);
     }
@@ -65,6 +69,7 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
   const addTransaction = async (transaction) => {
     if (!currentUser?.uid) {
+      console.error('Usuário não autenticado');
       throw new Error('Usuário não autenticado');
     }
 
@@ -76,18 +81,26 @@ const useTransactions = (selectedMonth, selectedYear) => {
         value: parseFloat(transaction.value),
         date: transaction.date,
         description: transaction.description || '',
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        status: 'completed'
       };
 
-      await addDoc(collection(db, 'transacoes'), transactionData);
+      console.log('Tentando adicionar transação:', transactionData);
+      console.log('Usuario atual:', currentUser.uid);
+
+      const docRef = await addDoc(collection(db, COLLECTION_NAME), transactionData);
+      console.log('Transação adicionada com sucesso na coleção:', COLLECTION_NAME, 'ID:', docRef.id);
+      return docRef.id;
+
     } catch (err) {
+      console.error('Erro ao adicionar transação:', err);
       throw err;
     }
   };
 
   const updateTransaction = async (id, updates) => {
     try {
-      const transactionRef = doc(db, 'transacoes', id);
+      const transactionRef = doc(db, COLLECTION_NAME, id);
       
       const updateData = {
         ...updates,
@@ -97,6 +110,7 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
       await updateDoc(transactionRef, updateData);
     } catch (err) {
+      console.error('Erro ao atualizar transação:', err);
       setError(err);
       throw err;
     }
@@ -104,9 +118,10 @@ const useTransactions = (selectedMonth, selectedYear) => {
 
   const deleteTransaction = async (id) => {
     try {
-      const transactionRef = doc(db, 'transacoes', id);
+      const transactionRef = doc(db, COLLECTION_NAME, id);
       await deleteDoc(transactionRef);
     } catch (err) {
+      console.error('Erro ao deletar transação:', err);
       setError(err);
       throw err;
     }

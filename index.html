@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Financeiro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Controle Financeiro</h1>
+            <button onclick="toggleTheme()" class="theme-toggle">Alternar Tema</button>
+        </div>
+        <div class="form-container">
+            <input type="text" id="descricao" placeholder="Descrição">
+            <input type="number" id="valor" placeholder="Valor">
+            <select id="tipo">
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+            </select>
+            <button onclick="financeiro.adicionarTransacao()">Adicionar</button>
+        </div>
+        <div id="lista-transacoes"></div>
+        <div id="saldo">Saldo: R$ 0,00</div>
+    </div>
+    <script src="contexts/ThemeContext.js"></script>
+    <script src="js/financeiro.js"></script>
+    <script>
+        ThemeContext.init();
+    </script>
+</body>
+</html>

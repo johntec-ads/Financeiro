@@ -95,28 +95,20 @@ const ErrorMessage = styled(LoadingMessage)`
   font-weight: bold; /* Destacar mensagem de erro */
 `;
 
-const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
-  const handleDelete = (id) => {
-    if (window.confirm('Tem certeza que deseja excluir esta transação?')) {
-      deleteTransaction(id);
-    }
-  };
+const TransactionList = ({ transactions, deleteTransaction, loading, error }) => {
+  console.log('TransactionList - transactions recebidas:', transactions); // Debug
 
   if (loading) {
-    return (
-      <LoadingMessage role="status" aria-live="polite">
-        Carregando transações, por favor aguarde...
-      </LoadingMessage>
-    );
+    return <LoadingMessage>Carregando transações...</LoadingMessage>;
   }
 
   if (error) {
-    return (
-      <ErrorMessage role="alert">
-        <h3>Erro ao carregar transações</h3>
-        <p>Por favor, recarregue a página ou tente novamente mais tarde.</p>
-      </ErrorMessage>
-    );
+    console.error('Erro na lista de transações:', error);
+    return <ErrorMessage>Erro ao carregar transações: {error.message}</ErrorMessage>;
+  }
+
+  if (!transactions || transactions.length === 0) {
+    return <LoadingMessage>Nenhuma transação encontrada para o período selecionado.</LoadingMessage>;
   }
 
   return (
@@ -124,49 +116,45 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
       <Table>
         <thead>
           <tr>
-            <Th scope="col">Tipo</Th>
-            <Th scope="col">Categoria</Th>
-            <Th scope="col">Valor</Th>
-            <Th scope="col">Data</Th>
-            <Th scope="col">Descrição</Th>
-            <Th scope="col">Ações</Th>
+            <Th>Tipo</Th>
+            <Th>Categoria</Th>
+            <Th>Valor</Th>
+            <Th>Data</Th>
+            <Th>Descrição</Th>
+            <Th>Ações</Th>
           </tr>
         </thead>
         <tbody>
-          {transactions && transactions.length > 0 ? (
-            transactions.map(transaction => (
+          {transactions.map(transaction => {
+            console.log('Renderizando transação:', transaction); // Debug por item
+            return (
               <tr key={transaction.id}>
                 <Td>{transaction.type}</Td>
                 <Td>{transaction.category}</Td>
                 <Td>
                   <ValueText type={transaction.type}>
-                    {typeof transaction.value === 'number' 
-                      ? new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL'
-                        }).format(transaction.value)
-                      : transaction.value}
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    }).format(transaction.value)}
                   </ValueText>
                 </Td>
-                <Td>{transaction.date}</Td>
+                <Td>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
                 <Td>{transaction.description}</Td>
                 <Td>
                   <DeleteButton 
-                    onClick={() => handleDelete(transaction.id)} 
-                    aria-label={`Excluir transação de ${transaction.category} no valor de ${transaction.value}`}
+                    onClick={() => {
+                      if (window.confirm('Tem certeza que deseja excluir esta transação?')) {
+                        deleteTransaction(transaction.id);
+                      }
+                    }}
                   >
                     Excluir
                   </DeleteButton>
                 </Td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <Td colSpan="6" style={{ textAlign: 'center' }}>
-                Nenhuma transação encontrada
-              </Td>
-            </tr>
-          )}
+            );
+          })}
         </tbody>
       </Table>
     </TableContainer>

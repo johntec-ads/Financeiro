@@ -126,6 +126,13 @@ const Dashboard = () => {
 
   const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactions(selectedMonth, selectedYear);
 
+  console.log('Dashboard - Estado das transações:', {
+    loading,
+    error,
+    transactionsCount: transactions?.length,
+    transactions
+  });
+
   const handleLogout = async () => {
     setLogoutLoading(true); // Inicia o estado de carregamento
     try {

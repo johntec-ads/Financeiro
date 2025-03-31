@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -17,6 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const analytics = getAnalytics(app);
 
-export { app, auth, db, analytics };
+// Habilitar persistência offline
+enableIndexedDbPersistence(db).catch((err) => {
+  console.error("Erro ao habilitar persistência:", err);
+});
+
+export { app, auth, db };
