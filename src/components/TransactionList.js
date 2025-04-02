@@ -98,6 +98,24 @@ const ErrorMessage = styled(LoadingMessage)`
 const TransactionList = ({ transactions, deleteTransaction, loading, error }) => {
   console.log('TransactionList - transactions recebidas:', transactions); // Debug
 
+  const handleDelete = async (id) => {
+    try {
+      if (window.confirm('Tem certeza que deseja excluir esta transação?')) {
+        await deleteTransaction(id);
+      }
+    } catch (error) {
+      // Melhor tratamento de erro para o usuário
+      if (error.message === 'Permissão negada') {
+        alert('Você não tem permissão para excluir esta transação.');
+      } else if (error.message === 'Transação não encontrada') {
+        alert('Esta transação já foi excluída.');
+      } else {
+        alert('Erro ao excluir transação. Por favor, tente novamente.');
+      }
+      console.error('Erro ao excluir transação:', error);
+    }
+  };
+
   if (loading) {
     return <LoadingMessage>Carregando transações...</LoadingMessage>;
   }
@@ -143,11 +161,8 @@ const TransactionList = ({ transactions, deleteTransaction, loading, error }) =>
                 <Td>{transaction.description}</Td>
                 <Td>
                   <DeleteButton 
-                    onClick={() => {
-                      if (window.confirm('Tem certeza que deseja excluir esta transação?')) {
-                        deleteTransaction(transaction.id);
-                      }
-                    }}
+                    onClick={() => handleDelete(transaction.id)}
+                    aria-label={`Excluir transação ${transaction.description}`}
                   >
                     Excluir
                   </DeleteButton>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 const COLLECTION_NAME = 'transactions'; // Constante para padronizar o nome da coleção
@@ -117,9 +117,33 @@ const useTransactions = (selectedMonth, selectedYear) => {
   };
 
   const deleteTransaction = async (id) => {
+    if (!currentUser?.uid) {
+      const error = new Error('Usuário não autenticado');
+      console.error('Erro ao deletar transação:', error);
+      setError(error);
+      throw error;
+    }
+
     try {
       const transactionRef = doc(db, COLLECTION_NAME, id);
+      
+      // Primeiro, verificar se a transação existe e pertence ao usuário
+      const transactionDoc = await getDoc(transactionRef);
+      
+      if (!transactionDoc.exists()) {
+        throw new Error('Transação não encontrada');
+      }
+      
+      if (transactionDoc.data().userId !== currentUser.uid) {
+        throw new Error('Permissão negada');
+      }
+
       await deleteDoc(transactionRef);
+      
+      // Atualiza o estado local após exclusão bem-sucedida
+      setTransactions(prev => prev.filter(t => t.id !== id));
+      
+      console.log('Transação deletada com sucesso:', id);
     } catch (err) {
       console.error('Erro ao deletar transação:', err);
       setError(err);
