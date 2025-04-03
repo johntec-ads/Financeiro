@@ -6,16 +6,6 @@
       "src": "icon-financeiro.png",
       "sizes": "64x64",
       "type": "image/png"
-    },
-    {
-      "src": "icon-financeiro.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "icon-financeiro.png",
-      "type": "image/png",
-      "sizes": "512x512"
     }
   ],
   "start_url": ".",
