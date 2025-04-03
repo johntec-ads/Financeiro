@@ -1,10 +1,35 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Função para verificar usuário autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Função para verificar se o usuário é dono do documento
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Regras para coleção de usuários
+    match /users/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId);
+      allow delete: if false; // Não permite deleção de contas
+    }
+    
+    // Regras para transações
     match /transactions/{transactionId} {
-      // Permite leitura e escrita se o usuário estiver autenticado e for dono da transação
-      allow read, write, delete: if request.auth != null && 
-        (resource == null || resource.data.userId == request.auth.uid);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.value > 0
+        && request.resource.data.value < 1000000000;
+      allow update: if isAuthenticated() 
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
   }
 }
