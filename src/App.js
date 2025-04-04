@@ -8,6 +8,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Analytics from './pages/Analytics';
 import { AuthProvider } from './context/AuthContext';
 import { GlobalStyle } from './styles/globalStyles';
+import { AuthMiddleware, PublicOnlyMiddleware } from './middleware/AuthMiddleware';
 
 function App() {
   return (
@@ -23,11 +24,31 @@ function App() {
         <GlobalStyle />
         <Router>
           <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/" element={
+              <PublicOnlyMiddleware>
+                <Login />
+              </PublicOnlyMiddleware>
+            } />
+            <Route path="/register" element={
+              <PublicOnlyMiddleware>
+                <Register />
+              </PublicOnlyMiddleware>
+            } />
+            <Route path="/dashboard" element={
+              <AuthMiddleware>
+                <Dashboard />
+              </AuthMiddleware>
+            } />
+            <Route path="/analytics" element={
+              <AuthMiddleware>
+                <Analytics />
+              </AuthMiddleware>
+            } />
+            <Route path="/forgot-password" element={
+              <PublicOnlyMiddleware>
+                <ForgotPassword />
+              </PublicOnlyMiddleware>
+            } />
           </Routes>
         </Router>
       </AuthProvider>
