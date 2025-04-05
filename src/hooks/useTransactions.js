@@ -82,7 +82,8 @@ const useTransactions = (selectedMonth, selectedYear) => {
         date: transaction.date,
         description: transaction.description || '',
         createdAt: serverTimestamp(),
-        status: 'completed'
+        status: 'completed',
+        paid: false // Adicionando campo paid
       };
 
       console.log('Tentando adicionar transação:', transactionData);

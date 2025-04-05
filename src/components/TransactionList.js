@@ -45,10 +45,12 @@ const Td = styled.td`
   padding: 1rem;
   border-bottom: 1px solid var(--border);
   color: var(--text);
+  text-decoration: ${props => props.paid ? 'line-through' : 'none'};
+  opacity: ${props => props.paid ? 0.7 : 1};
 
   @media (max-width: 768px) {
     padding: 0.75rem 0.5rem;
-    &:nth-child(4), &:nth-child(5) { // esconde colunas data e descrição
+    &:nth-child(4), &:nth-child(5) { 
       display: none;
     }
   }
@@ -61,6 +63,24 @@ const DeleteButton = styled.button`
   border: none;
   border-radius: 6px;
   font-size: 0.875rem;
+`;
+
+const PaidButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  color: ${props => props.paid ? 'var(--success)' : 'var(--text)'};
+
+  &:hover {
+    transform: scale(1.1);
+  }
 `;
 
 const ValueText = styled.span`
@@ -95,7 +115,7 @@ const ErrorMessage = styled(LoadingMessage)`
   font-weight: bold; /* Destacar mensagem de erro */
 `;
 
-const TransactionList = ({ transactions, deleteTransaction, loading, error }) => {
+const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
   console.log('TransactionList - transactions recebidas:', transactions); // Debug
 
   const handleDelete = async (id) => {
@@ -113,6 +133,18 @@ const TransactionList = ({ transactions, deleteTransaction, loading, error }) =>
         alert('Erro ao excluir transação. Por favor, tente novamente.');
       }
       console.error('Erro ao excluir transação:', error);
+    }
+  };
+
+  const handleTogglePaid = async (transaction) => {
+    try {
+      await updateTransaction(transaction.id, {
+        ...transaction,
+        paid: !transaction.paid
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      alert('Erro ao atualizar status do pagamento');
     }
   };
 
@@ -134,6 +166,7 @@ const TransactionList = ({ transactions, deleteTransaction, loading, error }) =>
       <Table>
         <thead>
           <tr>
+            <Th>Status</Th>
             <Th>Tipo</Th>
             <Th>Categoria</Th>
             <Th>Valor</Th>
@@ -147,9 +180,18 @@ const TransactionList = ({ transactions, deleteTransaction, loading, error }) =>
             console.log('Renderizando transação:', transaction); // Debug por item
             return (
               <tr key={transaction.id}>
-                <Td>{transaction.type}</Td>
-                <Td>{transaction.category}</Td>
                 <Td>
+                  <PaidButton
+                    paid={transaction.paid}
+                    onClick={() => handleTogglePaid(transaction)}
+                    title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
+                  >
+                    {transaction.paid ? "✓" : "💰"}
+                  </PaidButton>
+                </Td>
+                <Td paid={transaction.paid}>{transaction.type}</Td>
+                <Td paid={transaction.paid}>{transaction.category}</Td>
+                <Td paid={transaction.paid}>
                   <ValueText type={transaction.type}>
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
@@ -157,8 +199,8 @@ const TransactionList = ({ transactions, deleteTransaction, loading, error }) =>
                     }).format(transaction.value)}
                   </ValueText>
                 </Td>
-                <Td>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
-                <Td>{transaction.description}</Td>
+                <Td paid={transaction.paid}>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
+                <Td paid={transaction.paid}>{transaction.description}</Td>
                 <Td>
                   <DeleteButton 
                     onClick={() => handleDelete(transaction.id)}
