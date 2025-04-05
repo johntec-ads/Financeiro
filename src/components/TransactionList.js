@@ -186,7 +186,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                     onClick={() => handleTogglePaid(transaction)}
                     title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
                   >
-                    {transaction.paid ? "✓" : "💰"}
+                    {transaction.paid ? "💲✓" : "💲"}
                   </PaidButton>
                 </Td>
                 <Td paid={transaction.paid}>{transaction.type}</Td>

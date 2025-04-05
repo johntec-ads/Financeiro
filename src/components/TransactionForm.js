@@ -41,24 +41,24 @@ const Label = styled.label`
 
 const Input = styled.input`
   padding: 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid ${props => props.error ? 'var(--danger)' : 'var(--border)'};
   border-radius: 8px;
   font-size: 1rem;
   
   &:focus {
-    outline: 2px solid var(--primary);
+    outline: 2px solid ${props => props.error ? 'var(--danger)' : 'var(--primary)'};
     border-color: transparent;
   }
 `;
 
 const Select = styled.select`
   padding: 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid ${props => props.error ? 'var(--danger)' : 'var(--border)'};
   border-radius: 8px;
   font-size: 1rem;
   
   &:focus {
-    outline: 2px solid var(--primary);
+    outline: 2px solid ${props => props.error ? 'var(--danger)' : 'var(--primary)'};
     border-color: transparent;
   }
 `;
@@ -80,6 +80,12 @@ const Button = styled.button`
   }
 `;
 
+const ErrorMessage = styled.span`
+  color: var(--danger);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+`;
+
 const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const { currentUser } = useAuth();
   const [type, setType] = useState('receita');
@@ -89,11 +95,29 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!type) newErrors.type = 'Selecione um tipo de transação';
+    if (!category) newErrors.category = 'Selecione uma categoria';
+    if (!value || value <= 0) newErrors.value = 'Insira um valor válido';
+    if (!date) newErrors.date = 'Selecione uma data';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setFeedback('');
+    
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const transaction = {
@@ -113,6 +137,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
       setValue('');
       setDate('');
       setDescription('');
+      setErrors({});
     } catch (error) {
       console.error('Erro ao adicionar transação:', error);
       setFeedback('Erro ao adicionar transação. Tente novamente.');
@@ -126,15 +151,25 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label>Tipo</Label>
-          <Select value={type} onChange={(e) => setType(e.target.value)}>
+          <Select 
+            value={type} 
+            onChange={(e) => setType(e.target.value)}
+            error={errors.type}
+          >
+            <option value="">Selecione o tipo</option>
             <option value="receita">Receita</option>
             <option value="despesa">Despesa</option>
           </Select>
+          {errors.type && <ErrorMessage>{errors.type}</ErrorMessage>}
         </FormGroup>
         
         <FormGroup>
           <Label>Categoria</Label>
-          <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <Select 
+            value={category} 
+            onChange={(e) => setCategory(e.target.value)}
+            error={errors.category}
+          >
             <option value="">Selecione uma categoria</option>
             {type === 'receita' 
               ? incomeCategories.map(cat => (
@@ -145,6 +180,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
                 ))
             }
           </Select>
+          {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
         </FormGroup>
 
         <FormGroup>
@@ -153,7 +189,9 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             type="number"
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            error={errors.value}
           />
+          {errors.value && <ErrorMessage>{errors.value}</ErrorMessage>}
         </FormGroup>
 
         <FormGroup>
@@ -162,7 +200,9 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            error={errors.date}
           />
+          {errors.date && <ErrorMessage>{errors.date}</ErrorMessage>}
         </FormGroup>
 
         <FormGroup>
