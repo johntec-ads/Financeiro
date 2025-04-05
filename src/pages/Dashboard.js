@@ -114,7 +114,7 @@ const LoadingMessage = styled.p`
 const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [logoutLoading, setLogoutLoading] = useState(false); // Adicionado estado para feedback de logout
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -134,14 +134,14 @@ const Dashboard = () => {
   });
 
   const handleLogout = async () => {
-    setLogoutLoading(true); // Inicia o estado de carregamento
+    setLogoutLoading(true);
     try {
       await auth.signOut();
       navigate('/');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
     } finally {
-      setLogoutLoading(false); // Finaliza o estado de carregamento
+      setLogoutLoading(false);
     }
   };
 

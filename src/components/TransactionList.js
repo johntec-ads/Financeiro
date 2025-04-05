@@ -88,6 +88,32 @@ const ValueText = styled.span`
   font-weight: 500;
 `;
 
+const DueTag = styled.span`
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  background-color: ${props => {
+    if (props.overdue) return 'var(--danger)';
+    if (props.dueSoon) return 'var(--warning)';
+    return 'var(--success)';
+  }};
+  color: white;
+`;
+
+const getDueStatus = (date, paid) => {
+  if (paid) return null;
+  
+  const today = new Date();
+  const dueDate = new Date(date);
+  const threeDaysFromNow = new Date();
+  threeDaysFromNow.setDate(today.getDate() + 3);
+
+  if (dueDate < today) return { type: 'overdue', text: 'Vencido' };
+  if (dueDate <= threeDaysFromNow) return { type: 'dueSoon', text: 'Próximo' };
+  return null;
+};
+
 const LoadingContainer = styled.div`
   padding: 2rem;
   text-align: center;
@@ -186,7 +212,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                     onClick={() => handleTogglePaid(transaction)}
                     title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
                   >
-                    {transaction.paid ? "✓" : "💰"}
+                    {transaction.paid ? "💲✓" : "💲"}
                   </PaidButton>
                 </Td>
                 <Td paid={transaction.paid}>{transaction.type}</Td>
@@ -198,6 +224,17 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                       currency: 'BRL'
                     }).format(transaction.value)}
                   </ValueText>
+                  {transaction.type === 'despesa' && (
+                    (() => {
+                      const status = getDueStatus(transaction.date, transaction.paid);
+                      if (status) {
+                        return <DueTag overdue={status.type === 'overdue'} dueSoon={status.type === 'dueSoon'}>
+                          {status.text}
+                        </DueTag>;
+                      }
+                      return null;
+                    })()
+                  )}
                 </Td>
                 <Td paid={transaction.paid}>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
                 <Td paid={transaction.paid}>{transaction.description}</Td>
