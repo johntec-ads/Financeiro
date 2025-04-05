@@ -1,0 +1,15 @@
+Começar com TypeScript e validações :
+Esta é a primeira fase da implementação do TypeScript e melhorias nas validações. As principais melhorias incluem:
+Tipos mais específicos para transações e usuários
+Validações mais robustas com Zod
+Suporte a múltiplas moedas e idiomas
+Melhor tratamento de erros
+Configuração adequada do TypeScript
+
+
+
+
+Implementar testes unitários
+Melhorar segurança do Firebase
+Adicionar recursos de UX/UI
+Otimizar performance do aplicativo
