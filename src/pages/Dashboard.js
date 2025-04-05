@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase';
 import NavBar from '../components/NavBar';
+import { useNotifications } from '../hooks/useNotifications';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -117,6 +118,7 @@ const Dashboard = () => {
   const [logoutLoading, setLogoutLoading] = useState(false); // Adicionado estado para feedback de logout
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { checkPermission, checkDueTransactions } = useNotifications();
 
   useEffect(() => {
     if (!currentUser) {
@@ -132,6 +134,17 @@ const Dashboard = () => {
     transactionsCount: transactions?.length,
     transactions
   });
+
+  useEffect(() => {
+    const setupNotifications = async () => {
+      const hasPermission = await checkPermission();
+      if (hasPermission && transactions.length > 0) {
+        checkDueTransactions(transactions);
+      }
+    };
+
+    setupNotifications();
+  }, [transactions]); // Verifica quando as transações mudam
 
   const handleLogout = async () => {
     setLogoutLoading(true); // Inicia o estado de carregamento
