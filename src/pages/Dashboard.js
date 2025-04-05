@@ -17,7 +17,7 @@ const DashboardContainer = styled.div`
   flex-direction: column;
 
   @media (max-width: 768px) {
-    padding: var(--mobile-padding);
+    padding: 1rem;
   }
 `;
 
@@ -28,8 +28,8 @@ const Title = styled.h1`
   text-align: center;
 
   @media (max-width: 768px) {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
   }
 `;
 
@@ -42,7 +42,8 @@ const FilterContainer = styled.div`
 
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
   }
 `;
 
@@ -61,7 +62,8 @@ const Select = styled.select`
 
   @media (max-width: 768px) {
     width: 100%;
-    min-width: auto;
+    padding: 0.8rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -97,11 +99,20 @@ const LogoutButton = styled(Button)`
     width: auto;
     align-self: flex-end;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+  }
 `;
 
 const ContentContainer = styled.div`
+  width: 100%;
+  
   @media (max-width: 768px) {
-    padding: 0 1rem;
+    padding: 0;
+    overflow-x: hidden;
   }
 `;
 
