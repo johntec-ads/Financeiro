@@ -1,3 +1,4 @@
+Melhorias:
 1- Estrutura do Projeto:
 É uma aplicação React moderna usando Create React App
 Usa Firebase para autenticação e armazenamento de dados
