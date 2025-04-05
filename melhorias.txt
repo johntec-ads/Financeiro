@@ -34,14 +34,5 @@ Implementar PWA
 Adicionar exportação de dados
 Melhorar feedback de erros
 Adicionar mais análises financeiras
-Implementar notificações
 Otimizar performance
 Adicionar documentação
-
-Notificações e melhorias:
-Para melhorar futuramente, você poderia:
-
-Adicionar som às notificações
-Implementar service workers para notificações em segundo plano
-Adicionar opções de personalização do período de aviso
-Criar um painel dedicado para vencimentos

@@ -8,7 +8,6 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase';
 import NavBar from '../components/NavBar';
-import { useNotifications } from '../hooks/useNotifications';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -115,10 +114,9 @@ const LoadingMessage = styled.p`
 const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [logoutLoading, setLogoutLoading] = useState(false); // Adicionado estado para feedback de logout
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const { checkPermission, checkDueTransactions } = useNotifications();
 
   useEffect(() => {
     if (!currentUser) {
@@ -135,26 +133,15 @@ const Dashboard = () => {
     transactions
   });
 
-  useEffect(() => {
-    const setupNotifications = async () => {
-      const hasPermission = await checkPermission();
-      if (hasPermission && transactions.length > 0) {
-        checkDueTransactions(transactions);
-      }
-    };
-
-    setupNotifications();
-  }, [transactions]); // Verifica quando as transações mudam
-
   const handleLogout = async () => {
-    setLogoutLoading(true); // Inicia o estado de carregamento
+    setLogoutLoading(true);
     try {
       await auth.signOut();
       navigate('/');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
     } finally {
-      setLogoutLoading(false); // Finaliza o estado de carregamento
+      setLogoutLoading(false);
     }
   };
 

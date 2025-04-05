@@ -45,8 +45,7 @@ export const userSchema = z.object({
 export const userSettingsSchema = z.object({
   theme: z.enum(['light', 'dark']),
   currency: z.enum(['BRL', 'USD', 'EUR']),
-  language: z.enum(['pt-BR', 'en-US']),
-  notifications: z.boolean(),
+  language: z.enum(['pt-BR', 'en-US'])
 });
 
 export type ValidationError = {
