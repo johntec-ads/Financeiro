@@ -8,8 +8,7 @@ const TableContainer = styled.div`
   overflow: auto;
 
   @media (max-width: 768px) {
-    margin: 0 -1rem;
-    border-radius: 0;
+    display: none; // Esconde a tabela em dispositivos móveis
   }
 `;
 
@@ -18,11 +17,6 @@ const Table = styled.table`
   border-collapse: separate;
   border-spacing: 0;
   min-width: 600px;
-
-  @media (max-width: 768px) {
-    font-size: 0.875rem;
-    min-width: auto;
-  }
 `;
 
 const Th = styled.th`
@@ -32,13 +26,6 @@ const Th = styled.th`
   font-weight: 500;
   color: var(--text);
   border-bottom: 2px solid var(--border);
-
-  @media (max-width: 768px) {
-    padding: 0.75rem 0.5rem;
-    &:nth-child(4), &:nth-child(5) { // esconde colunas data e descrição
-      display: none;
-    }
-  }
 `;
 
 const Td = styled.td`
@@ -47,13 +34,6 @@ const Td = styled.td`
   color: var(--text);
   text-decoration: ${props => props.paid ? 'line-through' : 'none'};
   opacity: ${props => props.paid ? 0.7 : 1};
-
-  @media (max-width: 768px) {
-    padding: 0.75rem 0.5rem;
-    &:nth-child(4), &:nth-child(5) { 
-      display: none;
-    }
-  }
 `;
 
 const DeleteButton = styled.button`
@@ -101,6 +81,73 @@ const DueTag = styled.span`
   color: white;
 `;
 
+const MobileCard = styled.div`
+  background: var(--card-bg);
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+`;
+
+const MobileStatusContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+`;
+
+const StatusLegend = styled.span`
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-align: center;
+`;
+
+const MobileContentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const MobileContainer = styled.div`
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const MobileHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const MobileDescription = styled.div`
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: ${props => props.paid ? 'line-through' : 'none'};
+  opacity: ${props => props.paid ? 0.7 : 1};
+`;
+
+const MobileValue = styled(ValueText)`
+  font-size: 1.1rem;
+`;
+
+const MobileInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+`;
+
+const MobileActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
 const getDueStatus = (date, paid) => {
   if (paid) return null;
   
@@ -113,18 +160,6 @@ const getDueStatus = (date, paid) => {
   if (dueDate <= threeDaysFromNow) return { type: 'dueSoon', text: 'Próximo' };
   return null;
 };
-
-const LoadingContainer = styled.div`
-  padding: 2rem;
-  text-align: center;
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-`;
-
-const ErrorContainer = styled(LoadingContainer)`
-  color: var(--danger);
-`;
 
 const LoadingMessage = styled.div`
   text-align: center;
@@ -188,70 +223,119 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
   }
 
   return (
-    <TableContainer>
-      <Table>
-        <thead>
-          <tr>
-            <Th>Status</Th>
-            <Th>Tipo</Th>
-            <Th>Categoria</Th>
-            <Th>Valor</Th>
-            <Th>Data</Th>
-            <Th>Descrição</Th>
-            <Th>Ações</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.map(transaction => {
-            console.log('Renderizando transação:', transaction); // Debug por item
-            return (
-              <tr key={transaction.id}>
-                <Td>
-                  <PaidButton
-                    paid={transaction.paid}
-                    onClick={() => handleTogglePaid(transaction)}
-                    title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
-                  >
-                    {transaction.paid ? "💲✓" : "💲"}
-                  </PaidButton>
-                </Td>
-                <Td paid={transaction.paid}>{transaction.type}</Td>
-                <Td paid={transaction.paid}>{transaction.category}</Td>
-                <Td paid={transaction.paid}>
-                  <ValueText type={transaction.type}>
-                    {new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL'
-                    }).format(transaction.value)}
-                  </ValueText>
-                  {transaction.type === 'despesa' && (
-                    (() => {
-                      const status = getDueStatus(transaction.date, transaction.paid);
-                      if (status) {
-                        return <DueTag overdue={status.type === 'overdue'} dueSoon={status.type === 'dueSoon'}>
-                          {status.text}
-                        </DueTag>;
-                      }
-                      return null;
-                    })()
-                  )}
-                </Td>
-                <Td paid={transaction.paid}>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
-                <Td paid={transaction.paid}>{transaction.description}</Td>
-                <Td>
-                  <DeleteButton 
-                    onClick={() => handleDelete(transaction.id)}
-                    aria-label={`Excluir transação ${transaction.description}`}
-                  >
-                    Excluir
-                  </DeleteButton>
-                </Td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
-    </TableContainer>
+    <>
+      {/* Versão Desktop */}
+      <TableContainer>
+        <Table>
+          <thead>
+            <tr>
+              <Th>Status</Th>
+              <Th>Tipo</Th>
+              <Th>Categoria</Th>
+              <Th>Valor</Th>
+              <Th>Data</Th>
+              <Th>Descrição</Th>
+              <Th>Ações</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map(transaction => {
+              console.log('Renderizando transação:', transaction); // Debug por item
+              return (
+                <tr key={transaction.id}>
+                  <Td>
+                    <PaidButton
+                      paid={transaction.paid}
+                      onClick={() => handleTogglePaid(transaction)}
+                      title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
+                    >
+                      {transaction.paid ? "💲✓" : "💲"}
+                    </PaidButton>
+                  </Td>
+                  <Td paid={transaction.paid}>{transaction.type}</Td>
+                  <Td paid={transaction.paid}>{transaction.category}</Td>
+                  <Td paid={transaction.paid}>
+                    <ValueText type={transaction.type}>
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      }).format(transaction.value)}
+                    </ValueText>
+                    {transaction.type === 'despesa' && (
+                      (() => {
+                        const status = getDueStatus(transaction.date, transaction.paid);
+                        if (status) {
+                          return <DueTag overdue={status.type === 'overdue'} dueSoon={status.type === 'dueSoon'}>
+                            {status.text}
+                          </DueTag>;
+                        }
+                        return null;
+                      })()
+                    )}
+                  </Td>
+                  <Td paid={transaction.paid}>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
+                  <Td paid={transaction.paid}>{transaction.description}</Td>
+                  <Td>
+                    <DeleteButton 
+                      onClick={() => handleDelete(transaction.id)}
+                      aria-label={`Excluir transação ${transaction.description}`}
+                    >
+                      Excluir
+                    </DeleteButton>
+                  </Td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+      </TableContainer>
+
+      {/* Versão Mobile */}
+      <MobileContainer>
+        {transactions.map(transaction => (
+          <MobileCard key={transaction.id}>
+            <MobileStatusContainer>
+              <PaidButton
+                paid={transaction.paid}
+                onClick={() => handleTogglePaid(transaction)}
+              >
+                {transaction.paid ? "💲✓" : "💲"}
+              </PaidButton>
+              <StatusLegend>
+                {transaction.paid ? "Pago" : "Pendente"}
+              </StatusLegend>
+            </MobileStatusContainer>
+
+            <MobileContentContainer>
+              <MobileHeader>
+                <MobileDescription paid={transaction.paid}>
+                  {transaction.description}
+                </MobileDescription>
+                <MobileValue type={transaction.type}>
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                  }).format(transaction.value)}
+                </MobileValue>
+              </MobileHeader>
+              
+              <MobileInfo>
+                <span>{transaction.category}</span>
+                <span>{new Date(transaction.date).toLocaleDateString('pt-BR')}</span>
+              </MobileInfo>
+
+              <MobileActions>
+                <DeleteButton 
+                  onClick={() => handleDelete(transaction.id)}
+                >
+                  Excluir
+                </DeleteButton>
+              </MobileActions>
+            </MobileContentContainer>
+          </MobileCard>
+        ))}
+      </MobileContainer>
+    </>
   );
 };
 
