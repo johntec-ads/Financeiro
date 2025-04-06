@@ -103,6 +103,13 @@ const StatusLegend = styled.span`
   text-align: center;
 `;
 
+const StatusContainer = styled(MobileStatusContainer)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+`;
+
 const MobileContentContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -146,6 +153,19 @@ const MobileActions = styled.div`
   justify-content: flex-end;
   gap: 0.5rem;
   margin-top: 0.5rem;
+`;
+
+const TableButtonsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const TableStatusContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
 `;
 
 const getDueStatus = (date, paid) => {
@@ -244,13 +264,18 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
               return (
                 <tr key={transaction.id}>
                   <Td>
-                    <PaidButton
-                      paid={transaction.paid}
-                      onClick={() => handleTogglePaid(transaction)}
-                      title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
-                    >
-                      {transaction.paid ? "💲✓" : "💲"}
-                    </PaidButton>
+                    <TableStatusContainer>
+                      <PaidButton
+                        paid={transaction.paid}
+                        onClick={() => handleTogglePaid(transaction)}
+                        title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
+                      >
+                        {transaction.paid ? "💲✓" : "💲"}
+                      </PaidButton>
+                      <StatusLegend>
+                        {transaction.paid ? "Pago" : "Pendente"}
+                      </StatusLegend>
+                    </TableStatusContainer>
                   </Td>
                   <Td paid={transaction.paid}>{transaction.type}</Td>
                   <Td paid={transaction.paid}>{transaction.category}</Td>
@@ -276,12 +301,19 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                   <Td paid={transaction.paid}>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
                   <Td paid={transaction.paid}>{transaction.description}</Td>
                   <Td>
-                    <DeleteButton 
-                      onClick={() => handleDelete(transaction.id)}
-                      aria-label={`Excluir transação ${transaction.description}`}
-                    >
-                      Excluir
-                    </DeleteButton>
+                    <TableButtonsContainer>
+                      <PaidButton
+                        paid={transaction.paid}
+                        onClick={() => handleTogglePaid(transaction)}
+                      >
+                        {transaction.paid ? "💲✓" : "💲"}
+                      </PaidButton>
+                      <DeleteButton 
+                        onClick={() => handleDelete(transaction.id)}
+                      >
+                        Excluir
+                      </DeleteButton>
+                    </TableButtonsContainer>
                   </Td>
                 </tr>
               );
