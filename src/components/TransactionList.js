@@ -63,22 +63,32 @@ const PaidButton = styled.button`
   }
 `;
 
+const ValueContainer = styled.div`
+  display: grid;
+  grid-template-columns: 120px auto; // Largura fixa para o valor, espaço automático para a tag
+  align-items: center;
+  gap: 0.5rem;
+`;
+
 const ValueText = styled.span`
   color: ${props => props.type === 'receita' ? 'var(--success)' : 'var(--danger)'};
   font-weight: 500;
+  text-align: right; // Alinha os valores à direita
+  white-space: nowrap;
 `;
 
 const DueTag = styled.span`
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
-  margin-left: 0.5rem;
   background-color: ${props => {
     if (props.overdue) return 'var(--danger)';
     if (props.dueSoon) return 'var(--warning)';
     return 'var(--success)';
   }};
   color: white;
+  white-space: nowrap;
+  justify-self: start; // Alinha a tag à esquerda do seu espaço
 `;
 
 const MobileCard = styled.div`
@@ -199,6 +209,14 @@ const ErrorMessage = styled(LoadingMessage)`
 const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
   console.log('TransactionList - transactions recebidas:', transactions); // Debug
 
+  // Função para ordenar transações (receitas primeiro, depois despesas)
+  const sortTransactions = (transactions) => {
+    return [...transactions].sort((a, b) => {
+      if (a.type === b.type) return 0;
+      return a.type === 'receita' ? -1 : 1;
+    });
+  };
+
   const handleDelete = async (id) => {
     try {
       if (window.confirm('Tem certeza que deseja excluir esta transação?')) {
@@ -259,7 +277,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
             </tr>
           </thead>
           <tbody>
-            {transactions.map(transaction => {
+            {sortTransactions(transactions).map(transaction => {
               console.log('Renderizando transação:', transaction); // Debug por item
               return (
                 <tr key={transaction.id}>
@@ -280,23 +298,25 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                   <Td paid={transaction.paid}>{transaction.type}</Td>
                   <Td paid={transaction.paid}>{transaction.category}</Td>
                   <Td paid={transaction.paid}>
-                    <ValueText type={transaction.type}>
-                      {new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL'
-                      }).format(transaction.value)}
-                    </ValueText>
-                    {transaction.type === 'despesa' && (
-                      (() => {
-                        const status = getDueStatus(transaction.date, transaction.paid);
-                        if (status) {
-                          return <DueTag overdue={status.type === 'overdue'} dueSoon={status.type === 'dueSoon'}>
-                            {status.text}
-                          </DueTag>;
-                        }
-                        return null;
-                      })()
-                    )}
+                    <ValueContainer>
+                      <ValueText type={transaction.type}>
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(transaction.value)}
+                      </ValueText>
+                      {transaction.type === 'despesa' && (
+                        (() => {
+                          const status = getDueStatus(transaction.date, transaction.paid);
+                          if (status) {
+                            return <DueTag overdue={status.type === 'overdue'} dueSoon={status.type === 'dueSoon'}>
+                              {status.text}
+                            </DueTag>;
+                          }
+                          return null;
+                        })()
+                      )}
+                    </ValueContainer>
                   </Td>
                   <Td paid={transaction.paid}>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
                   <Td paid={transaction.paid}>{transaction.description}</Td>
@@ -318,7 +338,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
 
       {/* Versão Mobile */}
       <MobileContainer>
-        {transactions.map(transaction => (
+        {sortTransactions(transactions).map(transaction => (
           <MobileCard key={transaction.id}>
             <MobileStatusContainer>
               <PaidButton

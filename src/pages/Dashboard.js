@@ -144,6 +144,13 @@ const Dashboard = () => {
     transactions
   });
 
+  console.log('Dashboard - Estado das transações:', {
+    loading,
+    error,
+    transactionsCount: transactions?.length,
+    transactions
+  });
+
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
