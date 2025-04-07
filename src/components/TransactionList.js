@@ -158,7 +158,7 @@ const MobileActions = styled.div`
 const TableButtonsContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: flex-end;
 `;
 
 const TableStatusContainer = styled.div`
@@ -302,12 +302,6 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                   <Td paid={transaction.paid}>{transaction.description}</Td>
                   <Td>
                     <TableButtonsContainer>
-                      <PaidButton
-                        paid={transaction.paid}
-                        onClick={() => handleTogglePaid(transaction)}
-                      >
-                        {transaction.paid ? "💲✓" : "💲"}
-                      </PaidButton>
                       <DeleteButton 
                         onClick={() => handleDelete(transaction.id)}
                       >
