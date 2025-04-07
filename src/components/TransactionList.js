@@ -136,6 +136,12 @@ const MobileContainer = styled.div`
 
 const MobileHeader = styled.div`
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const MobileHeaderTop = styled.div`
+  display: flex;
   justify-content: space-between;
   align-items: center;
 `;
@@ -176,6 +182,37 @@ const TableStatusContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 0.3rem;
+`;
+
+const MobileValueContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const MobileValueSection = styled.div`
+  display: grid;
+  grid-template-columns: auto 120px; // Coluna flexível para tag, fixa para valor
+  align-items: center;
+  gap: 1rem;
+`;
+
+const MobileTagContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-self: flex-start; // Alinha as tags à esquerda
+`;
+
+const MobileValueWrapper = styled.div`
+  text-align: right; // Alinha valores à direita
+  justify-self: flex-end; // Garante alinhamento à direita no grid
+`;
+
+const MobileDueTag = styled(DueTag)`
+  padding: 0.2rem 0.4rem;
+  font-size: 0.7rem;
+  margin: 0; // Remove margem padrão
 `;
 
 const getDueStatus = (date, paid) => {
@@ -354,15 +391,34 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
 
             <MobileContentContainer>
               <MobileHeader>
-                <MobileDescription paid={transaction.paid}>
-                  {transaction.description}
-                </MobileDescription>
-                <MobileValue type={transaction.type}>
-                  {new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  }).format(transaction.value)}
-                </MobileValue>
+                <MobileHeaderTop>
+                  <MobileDescription paid={transaction.paid}>
+                    {transaction.description}
+                  </MobileDescription>
+                  <MobileValueSection>
+                    <MobileTagContainer>
+                      {transaction.type === 'despesa' && (
+                        (() => {
+                          const status = getDueStatus(transaction.date, transaction.paid);
+                          if (status) {
+                            return <MobileDueTag overdue={status.type === 'overdue'} dueSoon={status.type === 'dueSoon'}>
+                              {status.text}
+                            </MobileDueTag>;
+                          }
+                          return null;
+                        })()
+                      )}
+                    </MobileTagContainer>
+                    <MobileValueWrapper>
+                      <MobileValue type={transaction.type}>
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(transaction.value)}
+                      </MobileValue>
+                    </MobileValueWrapper>
+                  </MobileValueSection>
+                </MobileHeaderTop>
               </MobileHeader>
               
               <MobileInfo>
