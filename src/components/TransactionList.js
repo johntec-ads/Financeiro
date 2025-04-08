@@ -249,8 +249,19 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
   // Função para ordenar transações (receitas primeiro, depois despesas)
   const sortTransactions = (transactions) => {
     return [...transactions].sort((a, b) => {
-      if (a.type === b.type) return 0;
-      return a.type === 'receita' ? -1 : 1;
+      // Primeiro critério: tipo (receitas primeiro)
+      if (a.type !== b.type) {
+        return a.type === 'receita' ? -1 : 1;
+      }
+      
+      // Segundo critério: status de pagamento (apenas para despesas)
+      if (a.type === 'despesa') {
+        if (a.paid !== b.paid) {
+          return a.paid ? 1 : -1; // Não pagas primeiro, pagas depois
+        }
+      }
+      
+      return 0;
     });
   };
 
