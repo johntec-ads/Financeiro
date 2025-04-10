@@ -1,4 +1,5 @@
 export const expenseCategories = [
+  'Cartão de crédito',
   'Alimentação',
   'Moradia',
   'Transporte',
@@ -6,7 +7,6 @@ export const expenseCategories = [
   'Educação',
   'Lazer',
   'Vestuário',
-  'Utilidades',
   'Outros'
 ];
 
@@ -14,7 +14,7 @@ export const incomeCategories = [
   'Salário',
   'Freelance',
   'Investimentos',
-  'Aluguel',
+  'Contribuições',
   'Vendas',
   'Outros'
 ];
