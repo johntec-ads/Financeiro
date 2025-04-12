@@ -1,70 +1,127 @@
-# Getting Started with Create React App
+# Financeiro - Sistema de Gestão Financeira
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![Badge em Desenvolvimento](https://img.shields.io/badge/status-em%20desenvolvimento-brightgreen)
 
-## Available Scripts
+## 📋 Descrição do Projeto
 
-In the project directory, you can run:
+O App Financeiro é uma aplicação web para gerenciamento de finanças pessoais ou empresariais, permitindo o controle de receitas, despesas, investimentos e relatórios financeiros.
+
+## 🚀 Funcionalidades
+
+- Cadastro de receitas e despesas
+- Categorização de transações
+- Visualização de gráficos e relatórios
+- Controle de orçamento
+- Dashboard personalizado
+
+## 🛠️ Tecnologias Utilizadas
+
+- [React](https://reactjs.org/) - Biblioteca JavaScript para construção de interfaces
+- [JavaScript](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript) - Linguagem de programação
+- [CSS3](https://developer.mozilla.org/pt-BR/docs/Web/CSS) - Estilização
+- [Node.js](https://nodejs.org/en/) - Ambiente de execução JavaScript
+
+## 📦 Pré-requisitos
+
+- Node.js (versão 14.x ou superior)
+- npm (versão 6.x ou superior)
+- Git
+
+## 🔧 Instalação
+
+```bash
+# Clone este repositório
+$ git clone https://github.com/seu-usuario/Financeiro.git
+
+# Acesse a pasta do projeto
+$ cd Financeiro
+
+# Instale as dependências
+$ npm install
+
+# Configure as variáveis de ambiente
+$ cp .env.example .env
+# (Edite o arquivo .env com suas credenciais do Firebase)
+```
+
+## 🔐 Configuração do Firebase
+
+Para garantir a segurança das chaves do Firebase:
+
+1. Crie um arquivo `.env` baseado no exemplo fornecido (não incluído no repositório)
+2. Adicione suas credenciais do Firebase neste arquivo
+3. O arquivo `.env` já está incluído no `.gitignore` para evitar que credenciais sejam expostas
+
+Exemplo de arquivo `.env`:
+```
+REACT_APP_FIREBASE_API_KEY=sua_chave_api
+REACT_APP_FIREBASE_AUTH_DOMAIN=seu_dominio.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=seu_projeto_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=seu_bucket.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
+REACT_APP_FIREBASE_APP_ID=seu_app_id
+```
+
+Nunca compartilhe ou cometa suas chaves do Firebase diretamente no código.
+
+## 🚀 Scripts Disponíveis
+
+No diretório do projeto, você pode executar:
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Executa o aplicativo no modo de desenvolvimento.\
+Abra [http://localhost:3000](http://localhost:3000) para visualizá-lo no navegador.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+A página será recarregada quando você fizer alterações.\
+Você também pode ver erros de lint no console.
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Inicia o executor de teste no modo de observação interativo.\
+Consulte a seção sobre [execução de testes](https://facebook.github.io/create-react-app/docs/running-tests) para mais informações.
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Compila o aplicativo para produção na pasta `build`.\
+O React é agrupado corretamente no modo de produção e a compilação é otimizada para obter o melhor desempenho.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+A compilação é minificada e os nomes dos arquivos incluem os hashes.\
+Seu aplicativo está pronto para ser implantado!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📁 Estrutura do Projeto
 
-### `npm run eject`
+```
+Financeiro/
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── pages/
+│   ├── services/
+│   ├── styles/
+│   ├── utils/
+│   ├── App.tsx
+│   └── index.tsx
+├── package.json
+└── README.md
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🤝 Como Contribuir
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📝 Licença
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## Learn More
+## 👨‍💻 Desenvolvedor
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* **John Marcelo de Almeida** - [johntec-ads](https://github.com/johntec-ads)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+⌨️ com ❤️ por [John Marcelo de Almeida](https://github.com/johntec-ads)
