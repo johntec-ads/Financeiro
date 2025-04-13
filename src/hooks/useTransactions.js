@@ -87,7 +87,7 @@ const useTransactions = (selectedMonth, selectedYear) => {
       };
 
       console.log('Tentando adicionar transação:', transactionData);
-      console.log('Usuario atual:', currentUser.uid);
+      console.log('Usuário atual:', currentUser.uid);
 
       const docRef = await addDoc(collection(db, COLLECTION_NAME), transactionData);
       console.log('Transação adicionada com sucesso na coleção:', COLLECTION_NAME, 'ID:', docRef.id);
