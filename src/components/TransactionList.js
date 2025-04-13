@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaTrash, FaEdit } from 'react-icons/fa';
+import Modal from './Modal';
 
 const TableContainer = styled.div`
   background-color: var(--card-bg);
@@ -227,8 +228,34 @@ const ErrorMessage = styled(LoadingMessage)`
   font-weight: bold;
 `;
 
+const Label = styled.label`
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: var(--text);
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 1rem;
+  color: var(--text);
+  background-color: var(--background);
+`;
+
+const ModalBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
 const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
   console.log('TransactionList - transactions recebidas:', transactions);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTransaction, setCurrentTransaction] = useState(null);
 
   const sortTransactions = (transactions) => {
     return [...transactions].sort((a, b) => {
@@ -276,10 +303,15 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
   };
 
   const handleEdit = (transaction) => {
-    const updatedValue = prompt('Edite o valor da transação:', transaction.value);
-    if (updatedValue !== null) {
-      updateTransaction(transaction.id, { ...transaction, value: parseFloat(updatedValue) });
+    setCurrentTransaction(transaction);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = () => {
+    if (currentTransaction) {
+      updateTransaction(currentTransaction.id, currentTransaction);
     }
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -297,6 +329,46 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
 
   return (
     <>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Editar Transação"
+        onSave={handleSave}
+      >
+        <ModalBody>
+          <Label>
+            Valor:
+            <Input
+              type="number"
+              value={currentTransaction?.value || ''}
+              onChange={(e) =>
+                setCurrentTransaction({ ...currentTransaction, value: parseFloat(e.target.value) })
+              }
+            />
+          </Label>
+          <Label>
+            Data de Vencimento:
+            <Input
+              type="date"
+              value={currentTransaction?.date || ''}
+              onChange={(e) =>
+                setCurrentTransaction({ ...currentTransaction, date: e.target.value })
+              }
+            />
+          </Label>
+          <Label>
+            Descrição:
+            <Input
+              type="text"
+              value={currentTransaction?.description || ''}
+              onChange={(e) =>
+                setCurrentTransaction({ ...currentTransaction, description: e.target.value })
+              }
+            />
+          </Label>
+        </ModalBody>
+      </Modal>
+
       <TableContainer>
         <Table>
           <thead>
