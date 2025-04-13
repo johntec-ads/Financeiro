@@ -123,10 +123,9 @@ function Register() {
     try {
       await createUserWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
-          const user = userCredential.user;
           // Adiciona os dados do usuário ao Firestore
-          await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
+          await setDoc(doc(db, "users", userCredential.user.uid), {
+            uid: userCredential.user.uid,
             email: email,
             firstName: firstName,
             lastName: lastName,
@@ -135,8 +134,23 @@ function Register() {
         })
         .catch((error) => {
           const errorCode = error.code;
-          const errorMessage = error.message;
-          alert('Erro ao criar conta: ' + errorMessage);
+          let errorMessage;
+
+          switch (errorCode) {
+            case 'auth/email-already-in-use':
+              errorMessage = 'Este email já está em uso. Tente outro.';
+              break;
+            case 'auth/invalid-email':
+              errorMessage = 'Email inválido. Verifique e tente novamente.';
+              break;
+            case 'auth/weak-password':
+              errorMessage = 'Senha fraca. Escolha uma senha mais forte.';
+              break;
+            default:
+              errorMessage = 'Erro ao criar conta. Por favor, tente novamente.';
+          }
+
+          alert(errorMessage);
         });
     } catch (error) {
       alert('Erro ao criar conta: ' + error.message);

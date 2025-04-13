@@ -72,14 +72,28 @@ function Login() {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
+        .then(() => {
           navigate('/dashboard');
         })
         .catch((error) => {
           const errorCode = error.code;
-          const errorMessage = error.message;
-          alert('Erro ao fazer login: ' + errorMessage);
+          let errorMessage;
+
+          switch (errorCode) {
+            case 'auth/user-not-found':
+              errorMessage = 'Usuário não encontrado. Verifique o email e tente novamente.';
+              break;
+            case 'auth/wrong-password':
+              errorMessage = 'Senha incorreta. Tente novamente.';
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = 'Muitas tentativas de login. Tente novamente mais tarde.';
+              break;
+            default:
+              errorMessage = 'Erro ao fazer login. Por favor, tente novamente.';
+          }
+
+          alert(errorMessage);
         });
     } catch (error) {
       alert('Erro ao fazer login: ' + error.message);

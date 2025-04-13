@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 
 const TableContainer = styled.div`
   background-color: var(--card-bg);
@@ -113,13 +114,6 @@ const StatusLegend = styled.span`
   text-align: center;
 `;
 
-const StatusContainer = styled(MobileStatusContainer)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-`;
-
 const MobileContentContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -182,12 +176,6 @@ const TableStatusContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 0.3rem;
-`;
-
-const MobileValueContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 `;
 
 const MobileValueSection = styled.div`
@@ -295,6 +283,14 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
     }
   };
 
+  // Adicionando funcionalidade de edição
+  const handleEdit = (transaction) => {
+    const updatedValue = prompt('Edite o valor da transação:', transaction.value);
+    if (updatedValue !== null) {
+      updateTransaction(transaction.id, { ...transaction, value: parseFloat(updatedValue) });
+    }
+  };
+
   if (loading) {
     return <LoadingMessage>Carregando transações...</LoadingMessage>;
   }
@@ -370,11 +366,12 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                   <Td paid={transaction.paid}>{transaction.description}</Td>
                   <Td>
                     <TableButtonsContainer>
-                      <DeleteButton 
-                        onClick={() => handleDelete(transaction.id)}
-                      >
-                        Excluir
-                      </DeleteButton>
+                      <button onClick={() => handleEdit(transaction)} title="Editar">
+                        <FaEdit style={{ color: 'blue', fontSize: '1.2rem' }} />
+                      </button>
+                      <button onClick={() => handleDelete(transaction.id)} title="Excluir">
+                        <FaTrash style={{ color: 'red', fontSize: '1.2rem' }} />
+                      </button>
                     </TableButtonsContainer>
                   </Td>
                 </tr>

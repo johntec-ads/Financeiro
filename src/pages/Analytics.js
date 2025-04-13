@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import Charts from '../components/Charts';
 import NavBar from '../components/NavBar';
-import { useAuth } from '../context/AuthContext';
 import useTransactions from '../hooks/useTransactions';
 
 const AnalyticsContainer = styled.div`
@@ -37,7 +36,6 @@ const Select = styled.select`
 const Analytics = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const { currentUser } = useAuth();
   
   const { transactions, loading, error } = useTransactions(selectedMonth, selectedYear);
 

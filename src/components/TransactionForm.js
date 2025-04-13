@@ -87,7 +87,6 @@ const ErrorMessage = styled.span`
 `;
 
 const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
-  const { currentUser } = useAuth();
   const [type, setType] = useState('receita');
   const [category, setCategory] = useState('');
   const [value, setValue] = useState('');
