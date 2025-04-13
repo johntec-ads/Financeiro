@@ -37,15 +37,6 @@ const Td = styled.td`
   opacity: ${props => props.paid ? 0.7 : 1};
 `;
 
-const DeleteButton = styled.button`
-  background-color: var(--danger);
-  color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-`;
-
 const PaidButton = styled.button`
   background: none;
   border: none;
