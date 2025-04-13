@@ -25,11 +25,6 @@ const LoginBox = styled.div`
   max-width: 400px; /* Limita a largura em telas maiores */
 `;
 
-const Logo = styled.img`
-  width: 80px;
-  margin-bottom: 20px;
-`;
-
 const LogoText = styled.h1`
   font-size: 2rem;
   font-weight: bold;
