@@ -4,48 +4,79 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-const Container = styled.div`
+const Background = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
+  height: 100vh;
+  background: linear-gradient(135deg, #2E7D32, #1B5E20); /* Tons de verde */
+  color: white;
+  padding: 20px; /* Para dispositivos móveis */
+`;
+
+const LoginBox = styled.div`
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  color: black;
+  width: 100%;
+  max-width: 400px; /* Limita a largura em telas maiores */
+`;
+
+const Logo = styled.img`
+  width: 80px;
+  margin-bottom: 20px;
+`;
+
+const LogoText = styled.h1`
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2E7D32; /* Verde escuro */
+  margin-bottom: 20px;
 `;
 
 const Title = styled.h1`
-  font-size: 24px;
+  font-size: 1.8rem;
   margin-bottom: 20px;
+  color: #2E7D32; /* Verde escuro */
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  width: 300px;
+  gap: 15px;
 `;
 
 const Input = styled.input`
   padding: 10px;
-  margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: 1rem;
+  width: 100%;
 `;
 
 const Button = styled.button`
   padding: 10px 15px;
-  background-color: #007bff;
+  background-color: #2E7D32; /* Verde escuro */
   color: white;
   border: none;
   border-radius: 4px;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.3s;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: #1B5E20; /* Tom mais escuro no hover */
   }
 `;
 
 const StyledLink = styled(Link)`
   margin-top: 15px;
-  color: #007bff;
+  color: #2E7D32; /* Verde escuro */
   text-decoration: none;
+  font-size: 0.9rem;
 
   &:hover {
     text-decoration: underline;
@@ -54,13 +85,20 @@ const StyledLink = styled(Link)`
 
 const ForgotPasswordLink = styled(Link)`
   margin-top: 5px;
-  color: #007bff;
+  color: #2E7D32; /* Verde escuro */
   text-decoration: none;
-  font-size: 14px;
+  font-size: 0.9rem;
 
   &:hover {
     text-decoration: underline;
   }
+`;
+
+const Footer = styled.footer`
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #2E7D32; /* Verde escuro */
+  text-align: center;
 `;
 
 function Login() {
@@ -101,26 +139,30 @@ function Login() {
   };
 
   return (
-    <Container>
-      <Title>Login</Title>
-      <Form onSubmit={handleLogin}>
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Input
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button type="submit">Entrar</Button>
-        <ForgotPasswordLink to="/forgot-password">Esqueci minha senha</ForgotPasswordLink>
-      </Form>
-      <StyledLink to="/register">Criar conta</StyledLink>
-    </Container>
+    <Background>
+      <LoginBox>
+        <LogoText>JOHNTEC</LogoText>
+        <Title>Bem-vindo ao Sistema Financeiro</Title>
+        <Form onSubmit={handleLogin}>
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button type="submit">Entrar</Button>
+          <ForgotPasswordLink to="/forgot-password">Esqueci minha senha</ForgotPasswordLink>
+        </Form>
+        <StyledLink to="/register">Criar conta</StyledLink>
+        <Footer>© 2025 JOHNTEC - Contato: <a href="mailto:johntec.ads@gmail.com">johntec.ads@gmail.com</a></Footer>
+      </LoginBox>
+    </Background>
   );
 }
 
