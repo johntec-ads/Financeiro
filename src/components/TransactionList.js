@@ -160,8 +160,8 @@ const MobileInfo = styled.div`
 
 const MobileActions = styled.div`
   display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
+  justify-content: flex-end; // Alinhar os botões à direita
+  gap: 1rem; // Espaçamento entre os botões
   margin-top: 0.5rem;
 `;
 
@@ -169,6 +169,11 @@ const TableButtonsContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 const TableStatusContainer = styled.div`
@@ -222,30 +227,27 @@ const LoadingMessage = styled.div`
   background: var(--card-bg);
   border-radius: 8px;
   margin: 1rem 0;
-  font-size: 1.25rem; /* Melhorar visibilidade */
-  color: var(--primary); /* Cor mais amigável */
+  font-size: 1.25rem;
+  color: var(--primary);
 `;
 
 const ErrorMessage = styled(LoadingMessage)`
   color: var(--danger);
-  font-weight: bold; /* Destacar mensagem de erro */
+  font-weight: bold;
 `;
 
 const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
-  console.log('TransactionList - transactions recebidas:', transactions); // Debug
+  console.log('TransactionList - transactions recebidas:', transactions);
 
-  // Função para ordenar transações (receitas primeiro, depois despesas)
   const sortTransactions = (transactions) => {
     return [...transactions].sort((a, b) => {
-      // Primeiro critério: tipo (receitas primeiro)
       if (a.type !== b.type) {
         return a.type === 'receita' ? -1 : 1;
       }
       
-      // Segundo critério: status de pagamento (apenas para despesas)
       if (a.type === 'despesa') {
         if (a.paid !== b.paid) {
-          return a.paid ? 1 : -1; // Não pagas primeiro, pagas depois
+          return a.paid ? 1 : -1;
         }
       }
       
@@ -259,7 +261,6 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
         await deleteTransaction(id);
       }
     } catch (error) {
-      // Melhor tratamento de erro para o usuário
       if (error.message === 'Permissão negada') {
         alert('Você não tem permissão para excluir esta transação.');
       } else if (error.message === 'Transação não encontrada') {
@@ -283,7 +284,6 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
     }
   };
 
-  // Adicionando funcionalidade de edição
   const handleEdit = (transaction) => {
     const updatedValue = prompt('Edite o valor da transação:', transaction.value);
     if (updatedValue !== null) {
@@ -306,7 +306,6 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
 
   return (
     <>
-      {/* Versão Desktop */}
       <TableContainer>
         <Table>
           <thead>
@@ -322,7 +321,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
           </thead>
           <tbody>
             {sortTransactions(transactions).map(transaction => {
-              console.log('Renderizando transação:', transaction); // Debug por item
+              console.log('Renderizando transação:', transaction);
               return (
                 <tr key={transaction.id}>
                   <Td>
@@ -381,7 +380,6 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
         </Table>
       </TableContainer>
 
-      {/* Versão Mobile */}
       <MobileContainer>
         {sortTransactions(transactions).map(transaction => (
           <MobileCard key={transaction.id}>
@@ -435,11 +433,12 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
               </MobileInfo>
 
               <MobileActions>
-                <DeleteButton 
-                  onClick={() => handleDelete(transaction.id)}
-                >
-                  Excluir
-                </DeleteButton>
+                <button onClick={() => handleEdit(transaction)} title="Editar">
+                  <FaEdit style={{ color: 'blue', fontSize: '1.2rem' }} />
+                </button>
+                <button onClick={() => handleDelete(transaction.id)} title="Excluir">
+                  <FaTrash style={{ color: 'red', fontSize: '1.2rem' }} />
+                </button>
               </MobileActions>
             </MobileContentContainer>
           </MobileCard>
