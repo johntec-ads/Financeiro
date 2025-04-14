@@ -251,6 +251,12 @@ const ModalBody = styled.div`
   gap: 1rem;
 `;
 
+// Ajustar a renderização da data para garantir que o fuso horário local seja usado
+const formatDate = (dateString) => {
+  const [year, month, day] = dateString.split('-');
+  return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+};
+
 const TransactionList = ({ transactions, deleteTransaction, updateTransaction, loading, error }) => {
   console.log('TransactionList - transactions recebidas:', transactions);
 
@@ -424,7 +430,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                       )}
                     </ValueContainer>
                   </Td>
-                  <Td paid={transaction.paid}>{new Date(transaction.date).toLocaleDateString('pt-BR')}</Td>
+                  <Td paid={transaction.paid}>{formatDate(transaction.date)}</Td>
                   <Td paid={transaction.paid}>{transaction.description}</Td>
                   <Td>
                     <TableButtonsContainer>
@@ -492,7 +498,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
               
               <MobileInfo>
                 <span>{transaction.category}</span>
-                <span>{new Date(transaction.date).toLocaleDateString('pt-BR')}</span>
+                <span>{formatDate(transaction.date)}</span>
               </MobileInfo>
 
               <MobileActions>
