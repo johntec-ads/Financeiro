@@ -56,8 +56,53 @@ const useTransactionsByClass = (month, year) => {
         },
         (error) => {
           console.error('Erro ao carregar transações por classe:', error);
-          setError(error);
-          setLoading(false);
+          
+          // Se houver erro de permissão, tentar carregar do formato legado
+          if (error.code === 'permission-denied') {
+            console.log('Tentando carregar transações do formato legado...');
+            
+            try {
+              const legacyTransactionsRef = collection(db, 'transactions');
+              const legacyQuery = query(
+                legacyTransactionsRef,
+                where('userId', '==', currentUser.uid),
+                where('month', '==', month),
+                where('year', '==', year),
+                orderBy('date', 'desc')
+              );
+
+              const legacyUnsubscribe = onSnapshot(legacyQuery,
+                (snapshot) => {
+                  const transactionsData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                  }));
+
+                  // Filtrar por classe se classId existir, senão mostrar todas
+                  const filteredTransactions = transactionsData.filter(t => 
+                    !t.classId || t.classId === activeClass.id
+                  );
+
+                  setTransactions(filteredTransactions);
+                  setLoading(false);
+                },
+                (legacyError) => {
+                  console.error('Erro ao carregar transações legadas:', legacyError);
+                  setError(legacyError);
+                  setLoading(false);
+                }
+              );
+
+              return () => legacyUnsubscribe();
+            } catch (legacyError) {
+              console.error('Erro ao configurar listener legado:', legacyError);
+              setError(legacyError);
+              setLoading(false);
+            }
+          } else {
+            setError(error);
+            setLoading(false);
+          }
         }
       );
 
@@ -74,6 +119,7 @@ const useTransactionsByClass = (month, year) => {
     if (!currentUser || !activeClass) return;
 
     try {
+      // Tentar primeiro o formato novo (aninhado)
       const transactionsRef = collection(db, 'users', currentUser.uid, 'transactions');
       
       const newTransaction = {
@@ -84,8 +130,21 @@ const useTransactionsByClass = (month, year) => {
         createdAt: new Date()
       };
 
-      const docRef = await addDoc(transactionsRef, newTransaction);
-      return { id: docRef.id, ...newTransaction };
+      try {
+        const docRef = await addDoc(transactionsRef, newTransaction);
+        return { id: docRef.id, ...newTransaction };
+      } catch (error) {
+        // Se falhar, tentar o formato legado
+        if (error.code === 'permission-denied') {
+          console.log('Tentando criar transação no formato legado...');
+          
+          const legacyTransactionsRef = collection(db, 'transactions');
+          const docRef = await addDoc(legacyTransactionsRef, newTransaction);
+          return { id: docRef.id, ...newTransaction };
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
       console.error('Erro ao adicionar transação:', error);
       setError(error);
@@ -98,11 +157,28 @@ const useTransactionsByClass = (month, year) => {
     if (!currentUser) return;
 
     try {
+      // Tentar primeiro o formato novo (aninhado)
       const transactionRef = doc(db, 'users', currentUser.uid, 'transactions', transactionId);
-      await updateDoc(transactionRef, {
-        ...updates,
-        updatedAt: new Date()
-      });
+      
+      try {
+        await updateDoc(transactionRef, {
+          ...updates,
+          updatedAt: new Date()
+        });
+      } catch (error) {
+        // Se falhar, tentar o formato legado
+        if (error.code === 'permission-denied') {
+          console.log('Tentando atualizar transação no formato legado...');
+          
+          const legacyTransactionRef = doc(db, 'transactions', transactionId);
+          await updateDoc(legacyTransactionRef, {
+            ...updates,
+            updatedAt: new Date()
+          });
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
       console.error('Erro ao atualizar transação:', error);
       setError(error);
@@ -115,8 +191,22 @@ const useTransactionsByClass = (month, year) => {
     if (!currentUser) return;
 
     try {
+      // Tentar primeiro o formato novo (aninhado)
       const transactionRef = doc(db, 'users', currentUser.uid, 'transactions', transactionId);
-      await deleteDoc(transactionRef);
+      
+      try {
+        await deleteDoc(transactionRef);
+      } catch (error) {
+        // Se falhar, tentar o formato legado
+        if (error.code === 'permission-denied') {
+          console.log('Tentando deletar transação no formato legado...');
+          
+          const legacyTransactionRef = doc(db, 'transactions', transactionId);
+          await deleteDoc(legacyTransactionRef);
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
       console.error('Erro ao deletar transação:', error);
       setError(error);
