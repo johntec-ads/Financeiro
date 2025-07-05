@@ -29,68 +29,6 @@ export const ClassProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
 
-  // Criar nova classe
-  const createClass = React.useCallback(async (classData) => {
-    if (!currentUser) return;
-
-    try {
-      const classesRef = collection(db, 'users', currentUser.uid, 'classes');
-      
-      // Se esta é a primeira classe ou é marcada como padrão, 
-      // remover isDefault das outras
-      if (classData.isDefault || classes.length === 0) {
-        await Promise.all(
-          classes.map(async (cls) => {
-            if (cls.isDefault) {
-              const classRef = doc(db, 'users', currentUser.uid, 'classes', cls.id);
-              await updateDoc(classRef, { isDefault: false });
-            }
-          })
-        );
-        classData.isDefault = true;
-      }
-
-      const docRef = await addDoc(classesRef, {
-        ...classData,
-        createdAt: new Date(),
-        isActive: true
-      });
-
-      const newClass = { id: docRef.id, ...classData };
-      
-      // Se é a primeira classe ou padrão, definir como ativa
-      if (classes.length === 0 || classData.isDefault) {
-        setActiveClass(newClass);
-      }
-
-      return newClass;
-    } catch (error) {
-      console.error('Erro ao criar classe:', error);
-      setError(error);
-      throw error;
-    }
-  }, [currentUser, classes]);
-
-  // Criar classe padrão
-  const createDefaultClass = React.useCallback(async () => {
-    try {
-      const defaultClassData = {
-        name: 'Contabilidade Geral',
-        description: 'Controle financeiro pessoal',
-        color: '#2E7D32',
-        icon: 'home',
-        budget: null,
-        isDefault: true,
-        isActive: true,
-        createdAt: new Date()
-      };
-
-      await createClass(defaultClassData);
-    } catch (error) {
-      console.error('Erro ao criar classe padrão:', error);
-    }
-  }, [createClass]);
-
   // Carregar classes do usuário
   useEffect(() => {
     if (!currentUser) {
@@ -112,18 +50,6 @@ export const ClassProvider = ({ children }) => {
         }));
 
         setClasses(classesData);
-
-        // Se não há classe ativa e existem classes, selecionar a padrão ou primeira
-        if (!activeClass && classesData.length > 0) {
-          const defaultClass = classesData.find(c => c.isDefault) || classesData[0];
-          setActiveClass(defaultClass);
-        }
-
-        // Se não há classes, criar uma padrão
-        if (classesData.length === 0) {
-          createDefaultClass();
-        }
-
         setLoading(false);
         setError(null);
       },
@@ -135,7 +61,81 @@ export const ClassProvider = ({ children }) => {
     );
 
     return () => unsubscribe();
-  }, [currentUser, activeClass, createDefaultClass]);
+  }, [currentUser]);
+
+  // Efeito separado para definir classe ativa
+  useEffect(() => {
+    if (!loading && classes.length > 0 && !activeClass) {
+      // Verificar se há uma classe salva no localStorage
+      const savedClassId = localStorage.getItem('activeClassId');
+      
+      let classToActivate = null;
+      
+      if (savedClassId) {
+        classToActivate = classes.find(c => c.id === savedClassId);
+      }
+      
+      // Se não encontrou a classe salva, usar a padrão ou primeira
+      if (!classToActivate) {
+        classToActivate = classes.find(c => c.isDefault) || classes[0];
+      }
+      
+      if (classToActivate) {
+        setActiveClass(classToActivate);
+      }
+    }
+  }, [classes, loading, activeClass]);
+
+  // Efeito separado para criar classe padrão quando necessário
+  useEffect(() => {
+    if (!currentUser || loading || classes.length > 0) return;
+
+    // Se não há classes, criar uma padrão
+    const createDefaultClass = async () => {
+      try {
+        const defaultClassData = {
+          name: 'Contabilidade Geral',
+          description: 'Controle financeiro pessoal',
+          color: '#2E7D32',
+          icon: 'home',
+          budget: null,
+          isDefault: true,
+          isActive: true,
+          createdAt: new Date()
+        };
+
+        const classesRef = collection(db, 'users', currentUser.uid, 'classes');
+        await addDoc(classesRef, defaultClassData);
+      } catch (error) {
+        console.error('Erro ao criar classe padrão:', error);
+        setError(error);
+      }
+    };
+
+    createDefaultClass();
+  }, [currentUser, loading, classes.length]);
+
+  // Criar nova classe
+  const createClass = async (classData) => {
+    if (!currentUser) return;
+
+    try {
+      const newClassData = {
+        ...classData,
+        isActive: true,
+        createdAt: new Date()
+      };
+
+      const classesRef = collection(db, 'users', currentUser.uid, 'classes');
+      const docRef = await addDoc(classesRef, newClassData);
+      
+      return { id: docRef.id, ...newClassData };
+    } catch (error) {
+      console.error('Erro ao criar classe:', error);
+      setError(error);
+      throw error;
+    }
+  };
 
   // Atualizar classe
   const updateClass = async (classId, updates) => {

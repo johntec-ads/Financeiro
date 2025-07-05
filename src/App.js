@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Analytics from './pages/Analytics';
+import ClassesDashboard from './pages/ClassesDashboard';
 import { AuthProvider } from './context/AuthContext';
 import { ClassProvider } from './context/ClassContext';
 import { GlobalStyle } from './styles/globalStyles';
@@ -44,6 +45,11 @@ function App() {
             <Route path="/analytics" element={
               <AuthMiddleware>
                 <Analytics />
+              </AuthMiddleware>
+            } />
+            <Route path="/classes" element={
+              <AuthMiddleware>
+                <ClassesDashboard />
               </AuthMiddleware>
             } />
             <Route path="/forgot-password" element={
