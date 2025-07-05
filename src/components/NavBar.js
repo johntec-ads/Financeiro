@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
+import UserInfo from './UserInfo';
 
 const Nav = styled.nav`
   background-color: var(--card-bg);
@@ -8,16 +9,28 @@ const Nav = styled.nav`
   margin-bottom: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+  }
 `;
 
 const NavList = styled.ul`
   display: flex;
   gap: 2rem;
   list-style: none;
-  justify-content: center;
+  margin: 0;
+  padding: 0;
 
   @media (max-width: 768px) {
     gap: 1rem;
+    justify-content: center;
   }
 `;
 
@@ -46,6 +59,7 @@ const NavBar = () => {
         <li><StyledNavLink to="/dashboard">Dashboard</StyledNavLink></li>
         <li><StyledNavLink to="/analytics">Análise</StyledNavLink></li>
       </NavList>
+      <UserInfo />
     </Nav>
   );
 };

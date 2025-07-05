@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import Charts from '../components/Charts';
 import NavBar from '../components/NavBar';
+import UserHeader from '../components/UserHeader';
 import useTransactions from '../hooks/useTransactions';
 
 const AnalyticsContainer = styled.div`
@@ -52,6 +53,7 @@ const Analytics = () => {
 
   return (
     <AnalyticsContainer>
+      <UserHeader />
       <NavBar />
       <Title>Análise Financeira</Title>
       

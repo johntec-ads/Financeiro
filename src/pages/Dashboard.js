@@ -6,8 +6,8 @@ import Summary from '../components/Summary';
 import useTransactions from '../hooks/useTransactions';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../services/firebase';
 import NavBar from '../components/NavBar';
+import UserHeader from '../components/UserHeader';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -67,46 +67,6 @@ const Select = styled.select`
   }
 `;
 
-const Button = styled.button`
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  background-color: var(--primary);
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--primary-hover);
-  }
-
-  &:focus {
-    outline: 2px solid var(--primary);
-  }
-`;
-
-const LogoutButton = styled(Button)`
-  margin-top: 2rem;
-  width: 100%;
-  background-color: var(--danger);
-  
-  &:hover {
-    opacity: 0.9;
-    background-color: var(--danger);
-  }
-  
-  @media (min-width: 769px) {
-    width: auto;
-    align-self: flex-end;
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    margin-top: 1.5rem;
-    padding: 0.8rem;
-  }
-`;
-
 const ContentContainer = styled.div`
   width: 100%;
   
@@ -125,7 +85,6 @@ const LoadingMessage = styled.p`
 const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [logoutLoading, setLogoutLoading] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -151,18 +110,6 @@ const Dashboard = () => {
     transactions
   });
 
-  const handleLogout = async () => {
-    setLogoutLoading(true);
-    try {
-      await auth.signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-    } finally {
-      setLogoutLoading(false);
-    }
-  };
-
   const monthNames = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril',
     'Maio', 'Junho', 'Julho', 'Agosto',
@@ -175,6 +122,7 @@ const Dashboard = () => {
     <DashboardContainer>
       {currentUser ? (
         <>
+          <UserHeader />
           <NavBar />
           <Title>Controle Financeiro</Title>
 
@@ -213,13 +161,6 @@ const Dashboard = () => {
               loading={loading}
               error={error}
             />
-            <LogoutButton 
-              onClick={handleLogout} 
-              disabled={logoutLoading} 
-              aria-busy={logoutLoading}
-            >
-              {logoutLoading ? 'Saindo...' : 'Sair'}
-            </LogoutButton>
           </ContentContainer>
         </>
       ) : (
