@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Analytics from './pages/Analytics';
 import { AuthProvider } from './context/AuthContext';
+import { ClassProvider } from './context/ClassContext';
 import { GlobalStyle } from './styles/globalStyles';
 import { AuthMiddleware, PublicOnlyMiddleware } from './middleware/AuthMiddleware';
 
@@ -14,15 +15,16 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <Helmet>
-          <link rel="icon" type="image/png" sizes="32x32" href="/icon-financeiro.png" />
-          <link rel="icon" type="image/png" sizes="16x16" href="/icon-financeiro.png" />
-          <link rel="apple-touch-icon" sizes="180x180" href="/icon-financeiro.png" />
-          <meta name="theme-color" content="#2E7D32" />
-          <title>Sistema Financeiro</title>
-        </Helmet>
-        <GlobalStyle />
-        <Router>
+        <ClassProvider>
+          <Helmet>
+            <link rel="icon" type="image/png" sizes="32x32" href="/icon-financeiro.png" />
+            <link rel="icon" type="image/png" sizes="16x16" href="/icon-financeiro.png" />
+            <link rel="apple-touch-icon" sizes="180x180" href="/icon-financeiro.png" />
+            <meta name="theme-color" content="#2E7D32" />
+            <title>Sistema Financeiro</title>
+          </Helmet>
+          <GlobalStyle />
+          <Router>
           <Routes>
             <Route path="/" element={
               <PublicOnlyMiddleware>
@@ -51,8 +53,9 @@ function App() {
             } />
           </Routes>
         </Router>
-      </AuthProvider>
-    </HelmetProvider>
+      </ClassProvider>
+    </AuthProvider>
+  </HelmetProvider>
   );
 }
 

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase';
 import { FiUser, FiMail, FiLogOut, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import ClassSelector from './ClassSelector';
 
 const HeaderContainer = styled.div`
   background-color: var(--card-bg);
@@ -14,10 +15,13 @@ const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 1rem;
+    align-items: stretch;
   }
 `;
 
@@ -164,7 +168,7 @@ const StatusDot = styled.div`
   border-radius: 50%;
 `;
 
-const UserHeader = () => {
+const UserHeader = ({ onManageClasses }) => {
   const [expanded, setExpanded] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const { currentUser } = useAuth();
@@ -223,6 +227,8 @@ const UserHeader = () => {
           </MenuItem>
         </DropdownMenu>
       </UserSection>
+
+      <ClassSelector onManageClasses={onManageClasses} />
 
       <StatusBadge>
         <StatusDot />

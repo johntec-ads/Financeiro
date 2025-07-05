@@ -17,9 +17,28 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isOwner(userId);
       allow update: if isAuthenticated() && isOwner(userId);
       allow delete: if false; // Não permite deleção de contas
+      
+      // Regras para classes dentro de cada usuário
+      match /classes/{classId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      // Regras para transações dentro de cada usuário
+      match /transactions/{transactionId} {
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated() 
+          && isOwner(userId)
+          && request.resource.data.value > 0
+          && request.resource.data.value < 1000000000
+          && request.resource.data.classId is string;
+        allow update: if isAuthenticated() 
+          && isOwner(userId)
+          && resource.data.userId == request.auth.uid;
+        allow delete: if isAuthenticated() && isOwner(userId);
+      }
     }
-    
-    // Regras para transações
+
+    // Regras legadas para compatibilidade (remover após migração)
     match /transactions/{transactionId} {
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated() 
