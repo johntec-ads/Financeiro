@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
-  Chart as ChartJS,
+  Chart as ChartJS,//Lib para gráficos
   ArcElement,
   Tooltip,
   Legend
 } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';//Lib para gráficos de pizza
 import { expenseCategories, incomeCategories } from '../constants/categories';
 
 ChartJS.register(
