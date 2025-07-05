@@ -4,6 +4,7 @@ import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import Summary from '../components/Summary';
 import useTransactionsByClass from '../hooks/useTransactionsByClass';
+import useLegacyDataMigration from '../hooks/useLegacyDataMigration';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
@@ -83,12 +84,57 @@ const LoadingMessage = styled.p`
   color: var(--primary);
 `;
 
+const MigrationBanner = styled.div`
+  background: linear-gradient(45deg, #FF9800, #FFC107);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+`;
+
+const MigrationText = styled.div`
+  font-weight: 500;
+`;
+
+const MigrationButton = styled.button`
+  background: white;
+  color: #FF9800;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+`;
+
 const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showClassManager, setShowClassManager] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+
+  // Hook para migração de dados legados
+  const { hasLegacyData, legacyCount, migrateLegacyData, loading: migrationLoading } = useLegacyDataMigration();
 
   useEffect(() => {
     if (!currentUser) {
@@ -97,6 +143,17 @@ const Dashboard = () => {
   }, [currentUser, navigate]);
 
   const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactionsByClass(selectedMonth, selectedYear);
+
+  // Função para lidar com migração
+  const handleMigration = async () => {
+    const result = await migrateLegacyData();
+    if (result.success) {
+      alert(`✅ ${result.count} transações migradas com sucesso! A página será recarregada.`);
+      window.location.reload();
+    } else {
+      alert(`❌ Erro na migração: ${result.error}`);
+    }
+  };
 
   console.log('Dashboard - Estado das transações:', {
     loading,
@@ -127,6 +184,21 @@ const Dashboard = () => {
           <UserHeader onManageClasses={() => setShowClassManager(true)} />
           <NavBar />
           <Title>Controle Financeiro</Title>
+
+          {hasLegacyData && (
+            <MigrationBanner>
+              <MigrationText>
+                📦 Encontramos {legacyCount} transações antigas em sua conta. 
+                Deseja migrar para o novo sistema de classes?
+              </MigrationText>
+              <MigrationButton 
+                onClick={handleMigration}
+                disabled={migrationLoading}
+              >
+                {migrationLoading ? 'Migrando...' : 'Migrar Dados'}
+              </MigrationButton>
+            </MigrationBanner>
+          )}
 
           <FilterContainer>
             <Select 

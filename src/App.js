@@ -7,10 +7,18 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Analytics from './pages/Analytics';
 import ClassesDashboard from './pages/ClassesDashboard';
+import DataMigrationModal from './components/DataMigrationModal';
 import { AuthProvider } from './context/AuthContext';
 import { ClassProvider } from './context/ClassContext';
 import { GlobalStyle } from './styles/globalStyles';
 import { AuthMiddleware, PublicOnlyMiddleware } from './middleware/AuthMiddleware';
+
+// Importar utilitários de debug em desenvolvimento
+if (process.env.NODE_ENV === 'development') {
+  import('./utils/migrationDebug');
+  import('./utils/firestoreDiagnostic');
+  import('./utils/legacyDiagnostic');
+}
 
 function App() {
   return (
@@ -25,6 +33,7 @@ function App() {
             <title>Sistema Financeiro</title>
           </Helmet>
           <GlobalStyle />
+          <DataMigrationModal />
           <Router>
           <Routes>
             <Route path="/" element={

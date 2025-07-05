@@ -142,15 +142,20 @@ export const ClassProvider = ({ children }) => {
     if (!currentUser) return;
 
     try {
+      // Tentar primeiro o formato novo (aninhado)
       const classRef = doc(db, 'users', currentUser.uid, 'classes', classId);
       
-      // Se está definindo como padrão, remover de outras
+      // Se está definindo como padrão, remover de outras primeiro
       if (updates.isDefault) {
         await Promise.all(
           classes.map(async (cls) => {
             if (cls.id !== classId && cls.isDefault) {
-              const otherClassRef = doc(db, 'users', currentUser.uid, 'classes', cls.id);
-              await updateDoc(otherClassRef, { isDefault: false });
+              try {
+                const otherClassRef = doc(db, 'users', currentUser.uid, 'classes', cls.id);
+                await updateDoc(otherClassRef, { isDefault: false });
+              } catch (error) {
+                console.log('Erro ao atualizar outra classe (pode ser normal se não existir):', error);
+              }
             }
           })
         );
@@ -168,8 +173,32 @@ export const ClassProvider = ({ children }) => {
 
     } catch (error) {
       console.error('Erro ao atualizar classe:', error);
-      setError(error);
-      throw error;
+      
+      // Se for erro de permissão, pode ser que a classe esteja em formato legado
+      if (error.code === 'permission-denied' || error.code === 'not-found') {
+        console.log('Classe pode não existir no formato aninhado. Tentando criar...');
+        
+        try {
+          // Tentar criar a classe no formato correto
+          const classData = {
+            ...classes.find(c => c.id === classId),
+            ...updates,
+            updatedAt: new Date()
+          };
+          
+          const classesRef = collection(db, 'users', currentUser.uid, 'classes');
+          await addDoc(classesRef, classData);
+          
+          console.log('Classe criada com sucesso no formato aninhado');
+        } catch (createError) {
+          console.error('Erro ao criar classe:', createError);
+          setError(createError);
+          throw createError;
+        }
+      } else {
+        setError(error);
+        throw error;
+      }
     }
   };
 

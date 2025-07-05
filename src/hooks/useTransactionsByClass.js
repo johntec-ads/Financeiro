@@ -5,7 +5,6 @@ import {
   collection, 
   query, 
   where, 
-  orderBy, 
   onSnapshot,
   addDoc,
   updateDoc,
@@ -33,78 +32,152 @@ const useTransactionsByClass = (month, year) => {
     setError(null);
 
     try {
-      const transactionsRef = collection(db, 'users', currentUser.uid, 'transactions');
+      // Primeiro, tentar carregar as transações do formato novo
+      let unsubscribe = null;
       
-      // Query para buscar transações da classe ativa no mês/ano especificado
-      const q = query(
-        transactionsRef,
-        where('classId', '==', activeClass.id),
-        where('month', '==', month),
-        where('year', '==', year),
-        orderBy('date', 'desc')
-      );
+      try {
+        const transactionsRef = collection(db, 'users', currentUser.uid, 'transactions');
+        
+        // Query mais simples - apenas por classe
+        const q = query(transactionsRef, where('classId', '==', activeClass.id));
 
-      const unsubscribe = onSnapshot(q, 
-        (snapshot) => {
-          const transactionsData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
+        unsubscribe = onSnapshot(q, 
+          (snapshot) => {
+            const transactionsData = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
 
-          setTransactions(transactionsData);
-          setLoading(false);
-        },
-        (error) => {
-          console.error('Erro ao carregar transações por classe:', error);
-          
-          // Se houver erro de permissão, tentar carregar do formato legado
-          if (error.code === 'permission-denied') {
-            console.log('Tentando carregar transações do formato legado...');
-            
-            try {
-              const legacyTransactionsRef = collection(db, 'transactions');
-              const legacyQuery = query(
-                legacyTransactionsRef,
-                where('userId', '==', currentUser.uid),
-                where('month', '==', month),
-                where('year', '==', year),
-                orderBy('date', 'desc')
-              );
-
-              const legacyUnsubscribe = onSnapshot(legacyQuery,
-                (snapshot) => {
-                  const transactionsData = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                  }));
-
-                  // Filtrar por classe se classId existir, senão mostrar todas
-                  const filteredTransactions = transactionsData.filter(t => 
-                    !t.classId || t.classId === activeClass.id
-                  );
-
-                  setTransactions(filteredTransactions);
-                  setLoading(false);
-                },
-                (legacyError) => {
-                  console.error('Erro ao carregar transações legadas:', legacyError);
-                  setError(legacyError);
-                  setLoading(false);
+            // Filtrar por mês e ano no cliente e ordenar
+            const filteredTransactions = transactionsData
+              .filter(t => {
+                // Primeira tentativa: usar campos month e year diretos
+                if (t.month && t.year) {
+                  return t.month === month && t.year === year;
                 }
-              );
+                
+                // Segunda tentativa: extrair de campo date
+                if (t.date) {
+                  const dateObj = new Date(t.date);
+                  const transactionMonth = dateObj.getMonth() + 1; // getMonth() retorna 0-11
+                  const transactionYear = dateObj.getFullYear();
+                  return transactionMonth === month && transactionYear === year;
+                }
+                
+                // Terceira tentativa: extrair de createdAt
+                if (t.createdAt) {
+                  const dateObj = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+                  const transactionMonth = dateObj.getMonth() + 1;
+                  const transactionYear = dateObj.getFullYear();
+                  return transactionMonth === month && transactionYear === year;
+                }
+                
+                // Se não tem data válida, não incluir
+                return false;
+              })
+              .sort((a, b) => {
+                // Ordenar por data decrescente
+                const dateA = new Date(a.date || a.createdAt);
+                const dateB = new Date(b.date || b.createdAt);
+                return dateB.getTime() - dateA.getTime();
+              });
 
-              return () => legacyUnsubscribe();
-            } catch (legacyError) {
-              console.error('Erro ao configurar listener legado:', legacyError);
+            setTransactions(filteredTransactions);
+            setLoading(false);
+          },
+          (error) => {
+            console.error('Erro ao carregar transações (formato novo):', error);
+            // Tentar formato legado
+            loadLegacyTransactions();
+          }
+        );
+      } catch (error) {
+        console.error('Erro ao configurar query nova:', error);
+        loadLegacyTransactions();
+      }
+
+      // Função para carregar transações do formato legado
+      function loadLegacyTransactions() {
+        console.log('🔄 Carregando transações do formato legado...');
+        
+        try {
+          const legacyTransactionsRef = collection(db, 'transactions');
+          
+          // Query simples por usuário
+          const legacyQuery = query(
+            legacyTransactionsRef,
+            where('userId', '==', currentUser.uid)
+          );
+
+          unsubscribe = onSnapshot(legacyQuery,
+            (snapshot) => {
+              const transactionsData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+              }));
+
+              console.log(`📦 Encontradas ${transactionsData.length} transações legadas`);
+
+              // Filtrar por classe, mês e ano no cliente e ordenar
+              const filteredTransactions = transactionsData
+                .filter(t => {
+                  // Se a transação não tem classId, mostrar em todas as classes
+                  // Se tem classId, mostrar apenas na classe correspondente
+                  const matchesClass = !t.classId || t.classId === activeClass.id;
+                  
+                  // Verificar data com fallback
+                  let matchesDate = false;
+                  if (t.month && t.year) {
+                    matchesDate = t.month === month && t.year === year;
+                  } else if (t.date) {
+                    const dateObj = new Date(t.date);
+                    const transactionMonth = dateObj.getMonth() + 1;
+                    const transactionYear = dateObj.getFullYear();
+                    matchesDate = transactionMonth === month && transactionYear === year;
+                  } else if (t.createdAt) {
+                    const dateObj = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+                    const transactionMonth = dateObj.getMonth() + 1;
+                    const transactionYear = dateObj.getFullYear();
+                    matchesDate = transactionMonth === month && transactionYear === year;
+                  }
+                  
+                  return matchesClass && matchesDate;
+                })
+                .sort((a, b) => {
+                  // Ordenar por data decrescente
+                  const dateA = new Date(a.date || a.createdAt);
+                  const dateB = new Date(b.date || b.createdAt);
+                  return dateB.getTime() - dateA.getTime();
+                });
+
+              // Adicionar classId automaticamente às transações sem classe
+              const transactionsWithClass = filteredTransactions.map(t => ({
+                ...t,
+                classId: t.classId || activeClass.id,
+                className: t.className || activeClass.name,
+                isLegacy: !t.classId // Marcar como legada
+              }));
+
+              setTransactions(transactionsWithClass);
+              setLoading(false);
+
+              // Informar ao usuário sobre dados legados encontrados
+              if (transactionsWithClass.length > 0) {
+                console.log(`✅ Carregadas ${transactionsWithClass.length} transações (${transactionsWithClass.filter(t => t.isLegacy).length} legadas)`);
+              }
+            },
+            (legacyError) => {
+              console.error('Erro ao carregar transações legadas:', legacyError);
               setError(legacyError);
               setLoading(false);
             }
-          } else {
-            setError(error);
-            setLoading(false);
-          }
+          );
+        } catch (legacyError) {
+          console.error('Erro ao configurar listener legado:', legacyError);
+          setError(legacyError);
+          setLoading(false);
         }
-      );
+      }
 
       return () => unsubscribe();
     } catch (error) {
