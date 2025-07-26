@@ -198,24 +198,62 @@ const Select = styled.select`
 `;
 
 const ClassesDashboard = () => {
+  // Hooks sempre no topo
+  const [yearSummary, setYearSummary] = useState({ receitas: 0, despesas: 0, saldo: 0 });
+  const [allTransactions, setAllTransactions] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showClassManager, setShowClassManager] = useState(false);
-  
   const { currentUser } = useAuth();
   const { classes, activeClass, switchActiveClass } = useClasses();
 
+  // Buscar todas as transações do usuário no ano selecionado
+  React.useEffect(() => {
+    if (!currentUser) return;
+    // Importação dinâmica do Firestore
+    import('../services/firebase').then(({ db }) => {
+      import('firebase/firestore').then(firestore => {
+        const { collection, query, where, getDocs } = firestore;
+        const transactionsRef = collection(db, 'transactions');
+        const q = query(transactionsRef, where('userId', '==', currentUser.uid));
+        getDocs(q).then(snapshot => {
+          const transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(t => {
+              let transactionYear = null;
+              if (t.year) transactionYear = t.year;
+              else if (t.date) transactionYear = new Date(t.date).getFullYear();
+              else if (t.createdAt) {
+                const dateObj = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+                transactionYear = dateObj.getFullYear();
+              }
+              return transactionYear === selectedYear;
+            });
+          setAllTransactions(transactions);
+        });
+      });
+    });
+  }, [currentUser, selectedYear]);
+
+  // Calcular resumo anual para 'Contabilidade Geral'
+  React.useEffect(() => {
+    const contabilidadeClasses = classes.filter(cls => cls.name === 'Contabilidade Geral');
+    const contabilidadeIds = contabilidadeClasses.map(cls => cls.id);
+    const filtered = allTransactions.filter(t => t.classId && contabilidadeIds.includes(t.classId));
+    const receitas = filtered.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.value, 0);
+    const despesas = filtered.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.value, 0);
+    setYearSummary({ receitas, despesas, saldo: receitas - despesas });
+  }, [allTransactions, classes, selectedYear]);
+
   // Calcular estatísticas gerais
+  // Função mock, substitua por lógica real se necessário
   const getClassSummary = (classItem) => {
-    // Por simplicidade, retornando dados mock
-    // Em uma implementação real, você consultaria as transações de cada classe
     return {
-      receitas: Math.random() * 5000,
-      despesas: Math.random() * 3000,
-      total: (Math.random() - 0.5) * 2000,
-      transactionCount: Math.floor(Math.random() * 20) + 1
+      receitas: 0,
+      despesas: 0,
+      total: 0,
+      transactionCount: 0
     };
-  };
+  } 
 
   const totalClasses = classes.length;
   const totalReceitas = classes.reduce((sum, cls) => sum + getClassSummary(cls).receitas, 0);
@@ -253,25 +291,20 @@ const ClassesDashboard = () => {
       
       <HeaderSection>
         <Title>Todas as Classes Financeiras</Title>
-        
         <StatsOverview>
           <StatItem>
-            <StatValue>{totalClasses}</StatValue>
-            <StatLabel>Classes Ativas</StatLabel>
+            <StatValue>{formatCurrency(yearSummary.receitas)}</StatValue>
+            <StatLabel>Receitas (Ano)</StatLabel>
           </StatItem>
           <StatItem>
-            <StatValue>{formatCurrency(totalReceitas)}</StatValue>
-            <StatLabel>Total Receitas</StatLabel>
+            <StatValue>{formatCurrency(yearSummary.despesas)}</StatValue>
+            <StatLabel>Despesas (Ano)</StatLabel>
           </StatItem>
           <StatItem>
-            <StatValue>{formatCurrency(totalDespesas)}</StatValue>
-            <StatLabel>Total Despesas</StatLabel>
-          </StatItem>
-          <StatItem>
-            <StatValue style={{ color: saldoGeral >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-              {formatCurrency(saldoGeral)}
+            <StatValue style={{ color: yearSummary.saldo >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+              {formatCurrency(yearSummary.saldo)}
             </StatValue>
-            <StatLabel>Saldo Geral</StatLabel>
+            <StatLabel>Saldo Geral (Ano)</StatLabel>
           </StatItem>
         </StatsOverview>
       </HeaderSection>
@@ -334,10 +367,18 @@ const ClassesDashboard = () => {
         </EmptyState>
       ) : (
         <ClassesGrid>
-          {classes.map(classItem => (
+          {/* Mostrar apenas classes criadas no mês/ano selecionado */}
+          {classes.filter(cls => {
+            if (!cls.createdAt) return false;
+            const dateObj = cls.createdAt.toDate ? cls.createdAt.toDate() : new Date(cls.createdAt);
+            return dateObj.getMonth() + 1 === selectedMonth && dateObj.getFullYear() === selectedYear;
+          }).map(classItem => (
             <ClassCard
               key={classItem.id}
-              classData={classItem}
+              classData={{
+                ...classItem,
+                name: `${classItem.name} - ${monthNames[selectedMonth - 1]} ${selectedYear}`
+              }}
               summary={getClassSummary(classItem)}
               onClick={() => handleClassClick(classItem)}
               isActive={activeClass?.id === classItem.id}
