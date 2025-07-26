@@ -82,7 +82,18 @@ const useTransactionsByClass = (month, year) => {
                 return dateB.getTime() - dateA.getTime();
               });
 
-            setTransactions(filteredTransactions);
+            // Deduplicar transações por valor, data e descrição
+            const dedupedTransactions = [];
+            const seen = new Set();
+            for (const t of filteredTransactions) {
+              // Chave única baseada nos principais campos
+              const key = `${t.value}-${t.date || t.createdAt}-${t.description}`;
+              if (!seen.has(key)) {
+                dedupedTransactions.push(t);
+                seen.add(key);
+              }
+            }
+            setTransactions(dedupedTransactions);
             setLoading(false);
           },
           (error) => {
@@ -158,7 +169,17 @@ const useTransactionsByClass = (month, year) => {
                 isLegacy: !t.classId // Marcar como legada
               }));
 
-              setTransactions(transactionsWithClass);
+              // Deduplicar transações por valor, data e descrição
+              const dedupedTransactions = [];
+              const seen = new Set();
+              for (const t of transactionsWithClass) {
+                const key = `${t.value}-${t.date || t.createdAt}-${t.description}`;
+                if (!seen.has(key)) {
+                  dedupedTransactions.push(t);
+                  seen.add(key);
+                }
+              }
+              setTransactions(dedupedTransactions);
               setLoading(false);
 
               // Informar ao usuário sobre dados legados encontrados
