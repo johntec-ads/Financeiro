@@ -246,12 +246,36 @@ const ClassesDashboard = () => {
 
   // Calcular estatísticas gerais
   // Função mock, substitua por lógica real se necessário
+  // Calcula o resumo da classe usando transações reais do mês/ano selecionado
   const getClassSummary = (classItem) => {
+    // Filtra transações do usuário para a classe e mês/ano selecionados
+    const transacoesClasse = allTransactions.filter(t => {
+      if (!t.classId || t.classId !== classItem.id) return false;
+      let transactionMonth = null;
+      let transactionYear = null;
+      if (t.month && t.year) {
+        transactionMonth = t.month;
+        transactionYear = t.year;
+      } else if (t.date) {
+        const dateObj = new Date(t.date);
+        transactionMonth = dateObj.getMonth() + 1;
+        transactionYear = dateObj.getFullYear();
+      } else if (t.createdAt) {
+        const dateObj = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+        transactionMonth = dateObj.getMonth() + 1;
+        transactionYear = dateObj.getFullYear();
+      }
+      return transactionMonth === selectedMonth && transactionYear === selectedYear;
+    });
+
+    const receitas = transacoesClasse.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.value, 0);
+    const despesas = transacoesClasse.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.value, 0);
+    const total = receitas - despesas;
     return {
-      receitas: 0,
-      despesas: 0,
-      total: 0,
-      transactionCount: 0
+      receitas,
+      despesas,
+      total,
+      transactionCount: transacoesClasse.length
     };
   } 
 
@@ -292,20 +316,41 @@ const ClassesDashboard = () => {
       <HeaderSection>
         <Title>Todas as Classes Financeiras</Title>
         <StatsOverview>
-          <StatItem>
-            <StatValue>{formatCurrency(yearSummary.receitas)}</StatValue>
-            <StatLabel>Receitas (Ano)</StatLabel>
-          </StatItem>
-          <StatItem>
-            <StatValue>{formatCurrency(yearSummary.despesas)}</StatValue>
-            <StatLabel>Despesas (Ano)</StatLabel>
-          </StatItem>
-          <StatItem>
-            <StatValue style={{ color: yearSummary.saldo >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-              {formatCurrency(yearSummary.saldo)}
-            </StatValue>
-            <StatLabel>Saldo Geral (Ano)</StatLabel>
-          </StatItem>
+          {/* Card resumo geral do ano (todas as classes) */}
+          {(() => {
+            // Filtra todas as transações do ano selecionado
+            const transacoesAno = allTransactions.filter(t => {
+              let transactionYear = null;
+              if (t.year) transactionYear = t.year;
+              else if (t.date) transactionYear = new Date(t.date).getFullYear();
+              else if (t.createdAt) {
+                const dateObj = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+                transactionYear = dateObj.getFullYear();
+              }
+              return transactionYear === selectedYear;
+            });
+            const receitasAno = transacoesAno.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.value, 0);
+            const despesasAno = transacoesAno.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.value, 0);
+            const saldoAno = receitasAno - despesasAno;
+            return (
+              <>
+                <StatItem>
+                  <StatValue>{formatCurrency(receitasAno)}</StatValue>
+                  <StatLabel>Receitas (Ano)</StatLabel>
+                </StatItem>
+                <StatItem>
+                  <StatValue>{formatCurrency(despesasAno)}</StatValue>
+                  <StatLabel>Despesas (Ano)</StatLabel>
+                </StatItem>
+                <StatItem>
+                  <StatValue style={{ color: saldoAno >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+                    {formatCurrency(saldoAno)}
+                  </StatValue>
+                  <StatLabel>Saldo Geral (Ano)</StatLabel>
+                </StatItem>
+              </>
+            );
+          })()}
         </StatsOverview>
       </HeaderSection>
 
@@ -368,22 +413,99 @@ const ClassesDashboard = () => {
       ) : (
         <ClassesGrid>
           {/* Mostrar apenas classes criadas no mês/ano selecionado */}
+          {/* Agrupar classes por nome */}
+          {/* Card especial para Contabilidade Geral (agrupado) */}
+          {(() => {
+            const contClasses = classes.filter(cls => cls.name === 'Contabilidade Geral');
+            if (contClasses.length === 0) return null;
+            const classIds = contClasses.map(c => c.id);
+            const color = contClasses[0].color;
+            const description = contClasses[0].description;
+            const budget = contClasses[0].budget;
+            const transacoesClasse = allTransactions.filter(t => {
+              // Inclui transações sem classId ou com classId de qualquer instância agrupada
+              const pertenceClasse = (!t.classId) || (t.classId && classIds.includes(t.classId));
+              if (!pertenceClasse) return false;
+              let transactionMonth = null;
+              let transactionYear = null;
+              if (t.month && t.year) {
+                transactionMonth = t.month;
+                transactionYear = t.year;
+              } else if (t.date) {
+                const dateObj = new Date(t.date);
+                transactionMonth = dateObj.getMonth() + 1;
+                transactionYear = dateObj.getFullYear();
+              } else if (t.createdAt) {
+                const dateObj = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+                transactionMonth = dateObj.getMonth() + 1;
+                transactionYear = dateObj.getFullYear();
+              }
+              return transactionMonth === selectedMonth && transactionYear === selectedYear;
+            });
+            const receitas = transacoesClasse.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.value, 0);
+            const despesas = transacoesClasse.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.value, 0);
+            const total = receitas - despesas;
+            return (
+              <ClassCard
+                key={'Contabilidade Geral'}
+                classData={{
+                  name: `Contabilidade Geral - ${monthNames[selectedMonth - 1]} ${selectedYear}`,
+                  color,
+                  description,
+                  budget
+                }}
+                summary={{ receitas, despesas, total, transactionCount: transacoesClasse.length }}
+                onClick={() => handleClassClick(contClasses[0])}
+                isActive={activeClass?.name === 'Contabilidade Geral'}
+              />
+            );
+          })()}
+
+          {/* Cards das demais classes (por instância) */}
           {classes.filter(cls => {
-            if (!cls.createdAt) return false;
-            const dateObj = cls.createdAt.toDate ? cls.createdAt.toDate() : new Date(cls.createdAt);
+            if (cls.name === 'Contabilidade Geral') return false;
+            const dateObj = cls.createdAt?.toDate ? cls.createdAt.toDate() : new Date(cls.createdAt);
             return dateObj.getMonth() + 1 === selectedMonth && dateObj.getFullYear() === selectedYear;
-          }).map(classItem => (
-            <ClassCard
-              key={classItem.id}
-              classData={{
-                ...classItem,
-                name: `${classItem.name} - ${monthNames[selectedMonth - 1]} ${selectedYear}`
-              }}
-              summary={getClassSummary(classItem)}
-              onClick={() => handleClassClick(classItem)}
-              isActive={activeClass?.id === classItem.id}
-            />
-          ))}
+          }).map(cls => {
+            const color = cls.color;
+            const description = cls.description;
+            const budget = cls.budget;
+            const transacoesClasse = allTransactions.filter(t => {
+              if (!t.classId || t.classId !== cls.id) return false;
+              let transactionMonth = null;
+              let transactionYear = null;
+              if (t.month && t.year) {
+                transactionMonth = t.month;
+                transactionYear = t.year;
+              } else if (t.date) {
+                const dateObj = new Date(t.date);
+                transactionMonth = dateObj.getMonth() + 1;
+                transactionYear = dateObj.getFullYear();
+              } else if (t.createdAt) {
+                const dateObj = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+                transactionMonth = dateObj.getMonth() + 1;
+                transactionYear = dateObj.getFullYear();
+              }
+              return transactionMonth === selectedMonth && transactionYear === selectedYear;
+            });
+            const receitas = transacoesClasse.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.value, 0);
+            const despesas = transacoesClasse.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.value, 0);
+            const total = receitas - despesas;
+            return (
+              <ClassCard
+                key={cls.id}
+                classData={{
+                  name: `${cls.name} - ${monthNames[selectedMonth - 1]} ${selectedYear}`,
+                  color,
+                  description,
+                  budget
+                }}
+                summary={{ receitas, despesas, total, transactionCount: transacoesClasse.length }}
+                onClick={() => handleClassClick(cls)}
+                isActive={activeClass?.id === cls.id}
+              />
+            );
+          })}
         </ClassesGrid>
       )}
 
