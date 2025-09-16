@@ -3,12 +3,11 @@ import styled from 'styled-components';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import Summary from '../components/Summary';
-import useTransactionsByClass from '../hooks/useTransactionsByClass';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import UserHeader from '../components/UserHeader';
-import ClassManager from '../components/ClassManager';
+import useTransactions from '../hooks/useTransactions';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -87,18 +86,16 @@ const LoadingMessage = styled.p`
 const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [showClassManager, setShowClassManager] = useState(false);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  // Hook para migração de dados legados
   useEffect(() => {
     if (!currentUser) {
       navigate('/');
     }
   }, [currentUser, navigate]);
 
-  const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactionsByClass(selectedMonth, selectedYear);
+  const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactions(selectedMonth, selectedYear);
 
   console.log('Dashboard - Estado das transações:', {
     loading,
@@ -126,11 +123,9 @@ const Dashboard = () => {
     <DashboardContainer>
       {currentUser ? (
         <>
-          <UserHeader onManageClasses={() => setShowClassManager(true)} />
+          <UserHeader />
           <NavBar />
           <Title>Controle Financeiro</Title>
-
-          {/* Modal de migração removido */}
 
           <FilterContainer>
             <Select 
@@ -168,11 +163,6 @@ const Dashboard = () => {
               error={error}
             />
           </ContentContainer>
-
-          <ClassManager 
-            isOpen={showClassManager}
-            onClose={() => setShowClassManager(false)}
-          />
         </>
       ) : (
         <LoadingMessage role="status" aria-live="polite">

@@ -11,29 +11,30 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
     
+    // Função para validar o tipo de transação
+    function isValidTransactionType(type) {
+      return type in ['Pessoal', 'Trabalho', 'Família', 'Investimentos', 'Outros'];
+    }
+    
     // Regras para coleção de usuários
     match /users/{userId} {
       allow read, write: if isAuthenticated() && isOwner(userId);
       
-      // Regras para classes dentro de cada usuário
-      match /classes/{classId} {
-        allow read, write: if isAuthenticated() && isOwner(userId);
-      }
-      
       // Regras para transações dentro de cada usuário  
       match /transactions/{transactionId} {
-        allow read, write: if isAuthenticated() && isOwner(userId);
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated() && 
+                     isOwner(userId) && 
+                     isValidTransactionType(request.resource.data.transactionType);
+        allow update: if isAuthenticated() && 
+                     isOwner(userId) && 
+                     isValidTransactionType(request.resource.data.transactionType);
+        allow delete: if isAuthenticated() && isOwner(userId);
       }
     }
 
-    // Regras legadas para compatibilidade (mais permissivas para teste)
+    // Regras para transações no formato legado (para compatibilidade durante a migração)
     match /transactions/{transactionId} {
-      allow read, write: if isAuthenticated() && 
-        (resource == null || resource.data.userId == request.auth.uid);
-    }
-    
-    // Regras para classes no formato legado
-    match /classes/{classId} {
       allow read, write: if isAuthenticated() && 
         (resource == null || resource.data.userId == request.auth.uid);
     }

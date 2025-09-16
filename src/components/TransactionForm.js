@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { expenseCategories, incomeCategories } from '../constants/categories';
+import { transactionTypes } from '../constants/transactionTypes';
 
 const FormContainer = styled.div`
   background-color: var(--card-bg);
@@ -87,6 +88,7 @@ const ErrorMessage = styled.span`
 
 const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const [type, setType] = useState('receita');
+  const [transactionType, setTransactionType] = useState('Pessoal');
   const [category, setCategory] = useState('');
   const [value, setValue] = useState('');
   const [date, setDate] = useState('');
@@ -99,6 +101,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
     const newErrors = {};
     
     if (!type) newErrors.type = 'Selecione um tipo de transação';
+    if (!transactionType) newErrors.transactionType = 'Selecione um grupo';
     if (!category) newErrors.category = 'Selecione uma categoria';
     if (!value || value <= 0) newErrors.value = 'Insira um valor válido';
     if (!date) newErrors.date = 'Selecione uma data';
@@ -120,10 +123,12 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
     try {
       const transaction = {
         type,
+        transactionType,
         category,
         value: parseFloat(value),
         date,
-        description
+        description,
+        isExpense: type === 'despesa'
       };
 
       await addTransaction(transaction);
@@ -159,6 +164,21 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             <option value="despesa">Despesa</option>
           </Select>
           {errors.type && <ErrorMessage>{errors.type}</ErrorMessage>}
+        </FormGroup>
+
+        <FormGroup>
+          <Label>Grupo</Label>
+          <Select 
+            value={transactionType} 
+            onChange={(e) => setTransactionType(e.target.value)}
+            error={errors.transactionType}
+          >
+            <option value="">Selecione o grupo</option>
+            {transactionTypes.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </Select>
+          {errors.transactionType && <ErrorMessage>{errors.transactionType}</ErrorMessage>}
         </FormGroup>
         
         <FormGroup>

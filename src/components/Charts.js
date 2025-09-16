@@ -111,6 +111,7 @@ const Charts = ({ transactions }) => {
         datasets: [{
           data: [1],
           backgroundColor: ['#e0e0e0'],
+          borderWidth: 1,
         }]
       };
     }

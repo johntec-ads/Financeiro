@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase';
 import { FiUser, FiMail, FiLogOut, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import ClassSelector from './ClassSelector';
 
 const HeaderContainer = styled.div`
   background-color: var(--card-bg);
@@ -227,8 +226,6 @@ const UserHeader = ({ onManageClasses }) => {
           </MenuItem>
         </DropdownMenu>
       </UserSection>
-
-      <ClassSelector onManageClasses={onManageClasses} />
 
       <StatusBadge>
         <StatusDot />

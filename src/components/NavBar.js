@@ -58,7 +58,6 @@ const NavBar = () => {
       <NavList>
         <li><StyledNavLink to="/dashboard">Dashboard</StyledNavLink></li>
         <li><StyledNavLink to="/analytics">Análise</StyledNavLink></li>
-        <li><StyledNavLink to="/classes">Classes</StyledNavLink></li>
       </NavList>
       <UserInfo />
     </Nav>
