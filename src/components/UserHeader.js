@@ -195,7 +195,7 @@ const UserHeader = ({ onManageClasses }) => {
   }
 
   return (
-    <HeaderContainer>
+    <HeaderContainer className="user-header">
       <UserSection>
         <UserCard expanded={expanded} onClick={toggleExpanded}>
           <UserIcon />

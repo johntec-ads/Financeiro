@@ -51,9 +51,64 @@ export const GlobalStyle = createGlobalStyle`
     }
   }
 
+
   @media (max-width: 480px) {
     html {
       font-size: 81.25%; // 13px
+    }
+  }
+
+  /* Cards e modais com sombra */
+  .card, .modal, [data-card] {
+    box-shadow: var(--shadow);
+    border-radius: 12px;
+    background: var(--card-bg);
+    transition: box-shadow 0.2s, background 0.2s;
+  }
+
+  /* Joyride tooltip moderno e compacto */
+  .react-joyride__tooltip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    max-width: 380px;
+    padding: 1.1rem 1.2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    word-break: break-word;
+    text-align: center;
+  }
+  .react-joyride__tooltip-content {
+    width: 100%;
+    margin-bottom: 0.7rem;
+    text-align: center;
+  }
+  .react-joyride__tooltip-footer {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 0.2rem;
+  }
+  .react-joyride__tooltip-footer button {
+    flex-shrink: 0;
+  }
+  @media (max-width: 600px) {
+    .react-joyride__tooltip {
+      font-size: 0.92rem;
+      max-width: 95vw;
+      padding: 0.7rem 0.5rem;
+    }
+    .react-joyride__tooltip-content {
+      margin-bottom: 0.5rem;
+    }
+    .react-joyride__tooltip-footer button {
+      font-size: 0.95em;
+      padding: 0.4rem 0.7rem;
     }
   }
 `;

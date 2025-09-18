@@ -158,6 +158,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             value={type} 
             onChange={(e) => setType(e.target.value)}
             error={errors.type}
+            className="joyride-tipo"
           >
             <option value="">Selecione o tipo</option>
             <option value="receita">Receita</option>
@@ -172,6 +173,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             value={transactionType} 
             onChange={(e) => setTransactionType(e.target.value)}
             error={errors.transactionType}
+            className="joyride-grupo"
           >
             <option value="">Selecione o grupo</option>
             {transactionTypes.map(type => (
@@ -187,6 +189,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             value={category} 
             onChange={(e) => setCategory(e.target.value)}
             error={errors.category}
+            className="joyride-categoria"
           >
             <option value="">Selecione uma categoria</option>
             {type === 'receita' 
@@ -208,6 +211,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             error={errors.value}
+            className="joyride-valor"
           />
           {errors.value && <ErrorMessage>{errors.value}</ErrorMessage>}
         </FormGroup>
@@ -219,6 +223,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             error={errors.date}
+            className="joyride-data"
           />
           {errors.date && <ErrorMessage>{errors.date}</ErrorMessage>}
         </FormGroup>
@@ -229,10 +234,11 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            className="joyride-descricao"
           />
         </FormGroup>
 
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} className="add-transaction-btn">
           {isSubmitting ? 'Adicionando...' : 'Adicionar Transação'}
         </Button>
         {feedback && (

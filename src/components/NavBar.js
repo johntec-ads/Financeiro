@@ -54,10 +54,10 @@ const StyledNavLink = styled(NavLink)`
 
 const NavBar = () => {
   return (
-    <Nav>
+    <Nav className="navbar">
       <NavList>
-        <li><StyledNavLink to="/dashboard">Dashboard</StyledNavLink></li>
-        <li><StyledNavLink to="/analytics">Análise</StyledNavLink></li>
+  <li><StyledNavLink to="/dashboard">Dashboard</StyledNavLink></li>
+  <li><StyledNavLink to="/analytics" className="analytics-tab">Análise</StyledNavLink></li>
       </NavList>
       <UserInfo />
     </Nav>
