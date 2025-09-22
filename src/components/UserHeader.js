@@ -106,15 +106,6 @@ const DropdownMenu = styled.div`
   z-index: 100;
   overflow: hidden;
   display: ${props => props.show ? 'block' : 'none'};
-
-  @media (max-width: 768px) {
-    position: fixed;
-    top: auto;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-    margin-top: 0;
-  }
 `;
 
 const MenuItem = styled.button`
