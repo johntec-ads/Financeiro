@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import Joyride from 'react-joyride';
+import Joyride, { STATUS } from 'react-joyride';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import Summary from '../components/Summary';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import UserHeader from '../components/UserHeader';
 import useTransactions from '../hooks/useTransactions';
+import { FaQuestionCircle } from 'react-icons/fa';
 
 const DashboardContainer = styled.div`
   max-width: 1200px;
@@ -22,15 +23,56 @@ const DashboardContainer = styled.div`
   }
 `;
 
+const TitleContainer = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
 const Title = styled.h1`
   color: var(--primary);
-  margin-bottom: 2rem;
   font-size: 2rem;
   text-align: center;
 
   @media (max-width: 768px) {
     font-size: 1.3rem;
     margin-bottom: 0.8rem;
+  }
+`;
+
+const TutorialButton = styled.button`
+  background: transparent;
+  border: 1px solid var(--secondary);
+  color: var(--secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 1.5rem;
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: var(--secondary);
+    color: white;
+    filter: brightness(1);
+  }
+
+  span {
+    margin-left: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    margin-top: 1rem;
   }
 `;
 
@@ -132,7 +174,7 @@ const Dashboard = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [runTutorial, setRunTutorial] = useState(true);
+  const [runTutorial, setRunTutorial] = useState(false);
 
   useEffect(() => {
     if (!currentUser) {
@@ -142,37 +184,78 @@ const Dashboard = () => {
 
   const { transactions, loading, error, addTransaction, deleteTransaction, updateTransaction } = useTransactions(selectedMonth, selectedYear);
 
-  const steps = [
+  const handleJoyrideCallback = (data) => {
+    const { status } = data;
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      setRunTutorial(false);
+    }
+  };
+
+  const stepsDesktop = [
     {
       target: '.joyride-tipo',
-      content: isMobile ? 'Escolha Receita ou Despesa.' : 'Escolha se a transação é uma Receita (entrada) ou Despesa (saída).',
+      content: 'Comece por aqui! Defina se a transação é uma **Receita** (dinheiro que entra) ou uma **Despesa** (dinheiro que sai). Esta é a base para organizar suas finanças.',
       disableBeacon: true,
     },
     {
       target: '.joyride-grupo',
-      content: isMobile ? 'Selecione o grupo.' : 'Selecione o grupo ao qual essa transação pertence (ex: Pessoal, Trabalho, etc).',
+      content: 'Agora, agrupe sua transação. Pertence a algo **Pessoal**, do **Trabalho** ou outra área? Agrupar ajuda a ter uma visão geral de onde seu dinheiro está circulando.',
     },
     {
       target: '.joyride-categoria',
-      content: isMobile ? 'Escolha a categoria.' : 'Escolha a categoria para organizar melhor suas finanças.',
+      content: 'Seja específico! Escolha uma **categoria** como "Alimentação", "Transporte" ou "Salário". Quanto mais detalhado, melhores e mais úteis serão seus relatórios financeiros.',
     },
     {
       target: '.joyride-valor',
-      content: isMobile ? 'Informe o valor.' : 'Informe o valor da transação.',
+      content: 'Qual o **valor** desta transação? Insira o montante usando o formato de moeda local. Este é o coração do seu controle financeiro!',
     },
     {
       target: '.joyride-data',
-      content: isMobile ? 'Escolha a data.' : 'Selecione o dia do vencimento ou recebimento.',
+      content: 'Quando esta transação aconteceu ou está agendada? Selecione a **data** correta para manter seu fluxo de caixa sempre preciso e organizado.',
     },
     {
       target: '.joyride-descricao',
-      content: isMobile ? 'Descrição (opcional).' : 'Adicione uma descrição para identificar melhor a transação (opcional).',
+      content: 'Tem algum detalhe que vale a pena lembrar? Adicione uma **descrição** curta. Por exemplo: "Almoço com cliente" ou "Conta de luz de Maio". Ajuda muito na hora de revisar seus gastos!',
     },
     {
       target: '.add-transaction-btn',
-      content: isMobile ? 'Salvar.' : 'Clique aqui para salvar a transação preenchida.',
+      content: 'Tudo pronto! Clique aqui para **salvar** sua nova transação e vê-la registrada na sua lista. Parabéns por manter o controle de suas finanças!',
     },
   ];
+
+  const stepsMobile = [
+    {
+      target: '.joyride-tipo',
+      content: 'É uma **Receita** (entrada) ou **Despesa** (saída)? Comece por aqui para organizar a transação.',
+      disableBeacon: true,
+    },
+    {
+      target: '.joyride-grupo',
+      content: 'Agrupe a transação. É algo **Pessoal**, do **Trabalho**, etc? Isso ajuda a dar uma visão geral.',
+    },
+    {
+      target: '.joyride-categoria',
+      content: 'Escolha uma **categoria** (ex: "Alimentação", "Salário"). Detalhes geram relatórios melhores!',
+    },
+    {
+      target: '.joyride-valor',
+      content: 'Qual o **valor** da transação? Insira o montante para seu controle financeiro.',
+    },
+    {
+      target: '.joyride-data',
+      content: 'Selecione a **data** da transação para manter seu fluxo de caixa preciso.',
+    },
+    {
+      target: '.joyride-descricao',
+      content: 'Adicione uma **descrição** curta para lembrar dos detalhes. (Opcional)',
+    },
+    {
+      target: '.add-transaction-btn',
+      content: 'Pronto! Clique para **salvar** a transação na sua lista.',
+    },
+  ];
+
+  const steps = isMobile ? stepsMobile : stepsDesktop;
 
   const locale = {
     back: 'Voltar',
@@ -202,10 +285,17 @@ const Dashboard = () => {
             showProgress
             locale={locale}
             styles={CustomJoyrideStyles}
+            callback={handleJoyrideCallback}
           />
           <UserHeader />
+          <TitleContainer>
+            <Title>Controle Financeiro</Title>
+            <TutorialButton onClick={() => setRunTutorial(true)} aria-label="Iniciar tutorial">
+              <FaQuestionCircle />
+              <span>Tutorial</span>
+            </TutorialButton>
+          </TitleContainer>
           <NavBar />
-          <Title>Controle Financeiro</Title>
 
           <FilterContainer>
             <Select 
