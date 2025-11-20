@@ -6,25 +6,25 @@ import { transactionTypes } from '../constants/transactionTypes';
 const FormContainer = styled.div`
   background-color: var(--card-bg);
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   margin-bottom: 2rem;
+  border: 1px solid var(--border);
 
   @media (max-width: 768px) {
-    padding: 1rem;
-    border-radius: 8px;
+    padding: 1.5rem;
   }
 `;
 
 const Form = styled.form`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
   width: 100%;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 `;
 
@@ -37,42 +37,66 @@ const FormGroup = styled.div`
 const Label = styled.label`
   font-weight: 500;
   color: var(--text);
+  font-size: 0.9rem;
 `;
 
 const Input = styled.input`
   padding: 0.75rem;
   border: 1px solid ${props => props.error ? 'var(--danger)' : 'var(--border)'};
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  background-color: var(--background);
+  transition: all 0.2s ease;
   
   &:focus {
-    outline: 2px solid ${props => props.error ? 'var(--danger)' : 'var(--primary)'};
-    border-color: transparent;
+    outline: none;
+    border-color: ${props => props.error ? 'var(--danger)' : 'var(--primary)'};
+    box-shadow: 0 0 0 3px ${props => props.error ? 'var(--danger-light)' : 'var(--primary-light)'};
   }
 `;
 
 const Select = styled.select`
   padding: 0.75rem;
   border: 1px solid ${props => props.error ? 'var(--danger)' : 'var(--border)'};
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  background-color: var(--background);
+  transition: all 0.2s ease;
   
   &:focus {
-    outline: 2px solid ${props => props.error ? 'var(--danger)' : 'var(--primary)'};
-    border-color: transparent;
+    outline: none;
+    border-color: ${props => props.error ? 'var(--danger)' : 'var(--primary)'};
+    box-shadow: 0 0 0 3px ${props => props.error ? 'var(--danger-light)' : 'var(--primary-light)'};
   }
 `;
 
 const Button = styled.button`
   background-color: var(--primary);
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   width: 100%;
   margin-top: 1rem;
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
 
   @media (max-width: 768px) {
     padding: 1rem;

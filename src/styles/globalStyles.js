@@ -1,23 +1,43 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
   :root {
-    --primary: #2E7D32;
-    --primary-hover: #1B5E20;
-    --primary-light: #E8F5E8;
-    --secondary: #1565C0;
-    --danger: #C62828;
-    --danger-hover: #B71C1C;
-    --danger-light: #FFEBEE;
-    --warning: #F9A825;
-    --success: #2E7D32;
-    --success-light: #E8F5E8;
-    --background: #F5F5F5;
-    --bg-secondary: #FAFAFA;
-    --text: #333333;
-    --text-secondary: #666666;
-    --card-bg: #FFFFFF;
-    --border: #E0E0E0;
+    /* Modern Fintech Palette */
+    --primary: #6366f1; /* Indigo 500 */
+    --primary-hover: #4f46e5; /* Indigo 600 */
+    --primary-light: #e0e7ff; /* Indigo 100 */
+    
+    --secondary: #10b981; /* Emerald 500 */
+    --secondary-hover: #059669; /* Emerald 600 */
+    
+    --danger: #ef4444; /* Red 500 */
+    --danger-hover: #dc2626; /* Red 600 */
+    --danger-light: #fee2e2; /* Red 100 */
+    
+    --warning: #f59e0b; /* Amber 500 */
+    --success: #10b981; /* Emerald 500 */
+    --success-light: #d1fae5; /* Emerald 100 */
+    
+    --background: #f8fafc; /* Slate 50 */
+    --bg-secondary: #f1f5f9; /* Slate 100 */
+    
+    --text: #1e293b; /* Slate 800 */
+    --text-secondary: #64748b; /* Slate 500 */
+    
+    --card-bg: #ffffff;
+    --border: #e2e8f0; /* Slate 200 */
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+
     --mobile-padding: 1rem;
     --tablet-padding: 1.5rem;
     --desktop-padding: 2rem;
@@ -27,21 +47,28 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 
   body {
     background-color: var(--background);
     color: var(--text);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   button {
     cursor: pointer;
-    transition: filter 0.2s;
+    transition: all 0.2s ease-in-out;
+    font-family: 'Inter', sans-serif;
 
     &:hover {
-      filter: brightness(0.9);
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(0);
     }
   }
 

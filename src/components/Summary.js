@@ -1,50 +1,90 @@
 import React from 'react';
 import styled from 'styled-components';
+import { FiArrowUpCircle, FiArrowDownCircle, FiDollarSign } from 'react-icons/fi';
 
 const SummaryContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 `;
 
 const SummaryCard = styled.div`
   background-color: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.75rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 
-  @media (max-width: 768px) {
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
   }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: ${props => {
+      if (props.type === 'receita') return 'var(--success)';
+      if (props.type === 'despesa') return 'var(--danger)';
+      return 'var(--primary)';
+    }};
+  }
+`;
+
+const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 `;
 
 const Title = styled.h3`
-  color: var(--text);
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-
-  @media (max-width: 768px) {
-    margin-bottom: 0;
-  }
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 `;
 
-const Value = styled.p`
+const IconWrapper = styled.div`
   font-size: 1.5rem;
-  font-weight: bold;
   color: ${props => {
     if (props.type === 'receita') return 'var(--success)';
     if (props.type === 'despesa') return 'var(--danger)';
-    return props.value >= 0 ? 'var(--success)' : 'var(--danger)';
+    return 'var(--primary)';
   }};
+  background-color: ${props => {
+    if (props.type === 'receita') return 'var(--success-light)';
+    if (props.type === 'despesa') return 'var(--danger-light)';
+    return 'var(--primary-light)';
+  }};
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Value = styled.p`
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
 `;
 
 const Summary = ({ transactions }) => {
@@ -79,27 +119,44 @@ const Summary = ({ transactions }) => {
 
   return (
     <SummaryContainer>
-      <SummaryCard>
-        <Title>Total de Receitas</Title>
-        <Value type="receita">
+      <SummaryCard type="receita">
+        <CardHeader>
+          <Title>Entradas</Title>
+          <IconWrapper type="receita">
+            <FiArrowUpCircle />
+          </IconWrapper>
+        </CardHeader>
+        <Value>
           {new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
           }).format(receitas)}
         </Value>
       </SummaryCard>
-      <SummaryCard>
-        <Title>Total de Despesas</Title>
-        <Value type="despesa">
+
+      <SummaryCard type="despesa">
+        <CardHeader>
+          <Title>Saídas</Title>
+          <IconWrapper type="despesa">
+            <FiArrowDownCircle />
+          </IconWrapper>
+        </CardHeader>
+        <Value>
           {new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
           }).format(despesas)}
         </Value>
       </SummaryCard>
-      <SummaryCard>
-        <Title>Saldo</Title>
-        <Value value={saldo}>
+
+      <SummaryCard type="saldo">
+        <CardHeader>
+          <Title>Saldo Total</Title>
+          <IconWrapper type="saldo">
+            <FiDollarSign />
+          </IconWrapper>
+        </CardHeader>
+        <Value style={{ color: saldo >= 0 ? 'var(--success)' : 'var(--danger)' }}>
           {new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
