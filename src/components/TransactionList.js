@@ -1,93 +1,107 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaTrash, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaCheck } from 'react-icons/fa';
 import Modal from './Modal';
 
 const TableContainer = styled.div`
   background-color: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden; // Importante para bordas arredondadas
+  border: 1px solid var(--border);
 
   @media (max-width: 768px) {
-    display: none; // Esconde a tabela em dispositivos móveis
+    display: none;
   }
 `;
 
 const Table = styled.table`
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   min-width: 600px;
 `;
 
 const Th = styled.th`
-  background-color: var(--background);
-  padding: 1rem;
+  background-color: var(--bg-secondary);
+  padding: 1rem 1.5rem;
   text-align: left;
-  font-weight: 500;
-  color: var(--text);
-  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
 `;
 
 const Td = styled.td`
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
   color: var(--text);
-  text-decoration: ${props => props.paid ? 'line-through' : 'none'};
-  opacity: ${props => props.paid ? 0.7 : 1};
+  font-size: 0.9rem;
+  vertical-align: middle;
+  
+  ${props => props.paid && `
+    color: var(--text-secondary);
+  `}
 `;
 
 const PaidButton = styled.button`
   background: none;
-  border: none;
-  font-size: 1.2rem;
+  border: 2px solid ${props => props.paid ? 'var(--success)' : 'var(--border)'};
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  padding: 0.3rem;
-  margin-right: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
-  color: ${props => props.paid ? 'var(--success)' : 'var(--text)'};
-
+  transition: all 0.2s ease;
+  color: ${props => props.paid ? 'var(--success)' : 'transparent'};
+  
   &:hover {
-    transform: scale(1.1);
+    border-color: var(--success);
+    background-color: var(--success-light);
   }
 `;
 
 const ValueContainer = styled.div`
-  display: grid;
-  grid-template-columns: 120px auto; // Largura fixa para o valor, espaço automático para a tag
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  justify-content: flex-end;
 `;
 
 const ValueText = styled.span`
-  color: ${props => props.type === 'receita' ? 'var(--success)' : 'var(--danger)'};
-  font-weight: 500;
-  text-align: right; // Alinha os valores à direita
-  white-space: nowrap;
+  color: ${props => props.type === 'receita' ? 'var(--success)' : 'var(--text)'};
+  font-weight: 600;
+  font-family: 'Inter', monospace; // Números monoespaçados ficam melhores
 `;
 
 const DueTag = styled.span`
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
   background-color: ${props => {
+    if (props.overdue) return 'var(--danger-light)';
+    if (props.dueSoon) return 'var(--warning)'; // Warning geralmente não tem light definido no global, mas ok
+    return 'var(--success-light)';
+  }};
+  color: ${props => {
     if (props.overdue) return 'var(--danger)';
-    if (props.dueSoon) return 'var(--warning)';
+    if (props.dueSoon) return '#fff';
     return 'var(--success)';
   }};
-  color: white;
   white-space: nowrap;
-  justify-self: start; // Alinha a tag à esquerda do seu espaço
 `;
 
 const MobileCard = styled.div`
   background: var(--card-bg);
   padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 1rem;
@@ -390,24 +404,18 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
           </thead>
           <tbody>
             {sortTransactions(transactions).map(transaction => {
-              console.log('Renderizando transação:', transaction);
               return (
                 <tr key={transaction.id}>
                   <Td>
-                    <TableStatusContainer>
-                      <PaidButton
-                        paid={transaction.paid}
-                        onClick={() => handleTogglePaid(transaction)}
-                        title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
-                      >
-                        {transaction.paid ? "💲✓" : "💲"}
-                      </PaidButton>
-                      <StatusLegend>
-                        {transaction.paid ? "Pago" : "Pendente"}
-                      </StatusLegend>
-                    </TableStatusContainer>
+                    <PaidButton
+                      paid={transaction.paid}
+                      onClick={() => handleTogglePaid(transaction)}
+                      title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
+                    >
+                      {transaction.paid && <FaCheck size={14} />}
+                    </PaidButton>
                   </Td>
-                  <Td paid={transaction.paid}>{transaction.type}</Td>
+                  <Td paid={transaction.paid} style={{ textTransform: 'capitalize' }}>{transaction.type}</Td>
                   <Td paid={transaction.paid}>{transaction.category}</Td>
                   <Td paid={transaction.paid}>
                     <ValueContainer>
@@ -434,12 +442,12 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                   <Td paid={transaction.paid}>{transaction.description}</Td>
                   <Td>
                     <TableButtonsContainer>
-                      <button onClick={() => handleEdit(transaction)} title="Editar">
-                        <FaEdit style={{ color: 'blue', fontSize: '1.2rem' }} />
-                      </button>
-                      <button onClick={() => handleDelete(transaction.id)} title="Excluir">
-                        <FaTrash style={{ color: 'red', fontSize: '1.2rem' }} />
-                      </button>
+                      <ActionButton onClick={() => handleEdit(transaction)} title="Editar" color="var(--primary)">
+                        <FaEdit size={18} />
+                      </ActionButton>
+                      <ActionButton onClick={() => handleDelete(transaction.id)} title="Excluir" color="var(--danger)">
+                        <FaTrash size={18} />
+                      </ActionButton>
                     </TableButtonsContainer>
                   </Td>
                 </tr>
@@ -457,11 +465,8 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                 paid={transaction.paid}
                 onClick={() => handleTogglePaid(transaction)}
               >
-                {transaction.paid ? "💲✓" : "💲"}
+                {transaction.paid && <FaCheck size={14} />}
               </PaidButton>
-              <StatusLegend>
-                {transaction.paid ? "Pago" : "Pendente"}
-              </StatusLegend>
             </MobileStatusContainer>
 
             <MobileContentContainer>
@@ -502,12 +507,12 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
               </MobileInfo>
 
               <MobileActions>
-                <button onClick={() => handleEdit(transaction)} title="Editar">
-                  <FaEdit style={{ color: 'blue', fontSize: '1.2rem' }} />
-                </button>
-                <button onClick={() => handleDelete(transaction.id)} title="Excluir">
-                  <FaTrash style={{ color: 'red', fontSize: '1.2rem' }} />
-                </button>
+                <ActionButton onClick={() => handleEdit(transaction)} title="Editar" color="var(--primary)">
+                  <FaEdit size={18} />
+                </ActionButton>
+                <ActionButton onClick={() => handleDelete(transaction.id)} title="Excluir" color="var(--danger)">
+                  <FaTrash size={18} />
+                </ActionButton>
               </MobileActions>
             </MobileContentContainer>
           </MobileCard>
@@ -516,5 +521,20 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
     </>
   );
 };
+
+const ActionButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  color: var(--text-secondary);
+
+  &:hover {
+    background-color: var(--bg-secondary);
+    color: ${props => props.color || 'var(--text)'};
+  }
+`;
 
 export default TransactionList;

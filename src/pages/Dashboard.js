@@ -36,43 +36,47 @@ const TitleContainer = styled.div`
 `;
 
 const Title = styled.h1`
-  color: var(--primary);
-  font-size: 2rem;
-  text-align: center;
+  color: var(--text);
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: left;
+  letter-spacing: -0.02em;
 
   @media (max-width: 768px) {
-    font-size: 1.3rem;
-    margin-bottom: 0.8rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
   }
 `;
 
 const TutorialButton = styled.button`
-  background: transparent;
-  border: 1px solid var(--secondary);
-  color: var(--secondary);
-  font-size: 0.9rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  margin-left: 1.5rem;
+  margin-left: auto;
   display: flex;
   align-items: center;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  transition: all 0.2s ease-in-out;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+  gap: 0.5rem;
 
   &:hover {
-    background: var(--secondary);
-    color: white;
-    filter: brightness(1);
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary-light);
   }
 
   span {
-    margin-left: 0.5rem;
+    margin-left: 0;
   }
 
   @media (max-width: 768px) {
     margin-left: 0;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
 `;
 
@@ -129,40 +133,41 @@ const LoadingMessage = styled.p`
 const CustomJoyrideStyles = {
   options: {
     zIndex: 9999,
-    primaryColor: '#2E7D32',
-    textColor: '#333',
+    primaryColor: '#6366f1',
+    textColor: '#1e293b',
     backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: '1.2rem',
-    fontSize: 16,
-    width: 350,
-    boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+    borderRadius: 16,
+    padding: '1.5rem',
+    fontSize: 15,
+    width: 380,
+    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
   },
   tooltip: {
-    borderRadius: 24,
-    padding: '1.2rem',
-    fontSize: 16,
-    maxWidth: 350,
-    boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+    borderRadius: 16,
+    padding: '1.5rem',
+    fontSize: 15,
+    maxWidth: 380,
+    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
   },
   buttonNext: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#6366f1',
     borderRadius: 8,
     fontWeight: 600,
-    fontSize: 15,
-    padding: '0.5rem 0.8rem',
+    fontSize: 14,
+    padding: '0.6rem 1rem',
+    color: '#fff',
   },
   buttonBack: {
-    color: '#2E7D32',
+    color: '#6366f1',
     fontWeight: 600,
-    fontSize: 15,
-    padding: '0.5rem 0.8rem',
+    fontSize: 14,
+    padding: '0.6rem 1rem',
   },
   buttonSkip: {
-    color: '#C62828',
+    color: '#ef4444',
     fontWeight: 600,
-    fontSize: 15,
-    padding: '0.5rem 0.8rem',
+    fontSize: 14,
+    padding: '0.6rem 1rem',
   },
 };
 
