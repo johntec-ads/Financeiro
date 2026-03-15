@@ -121,13 +121,37 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const [feedback, setFeedback] = useState('');
   const [errors, setErrors] = useState({});
 
+  const parseCurrencyValue = (formattedValue) => {
+    if (!formattedValue) return 0;
+
+    const normalizedValue = formattedValue
+      .replace(/\./g, '')
+      .replace(',', '.');
+
+    return Number(normalizedValue) || 0;
+  };
+
+  const formatCurrencyInput = (inputValue) => {
+    const digitsOnly = inputValue.replace(/\D/g, '');
+
+    if (!digitsOnly) return '';
+
+    const numericValue = Number(digitsOnly) / 100;
+
+    return numericValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
   const validateForm = () => {
     const newErrors = {};
+    const numericValue = parseCurrencyValue(value);
     
     if (!type) newErrors.type = 'Selecione um tipo de transação';
     if (!transactionType) newErrors.transactionType = 'Selecione um grupo';
     if (!category) newErrors.category = 'Selecione uma categoria';
-    if (!value || value <= 0) newErrors.value = 'Insira um valor válido';
+    if (!value || numericValue <= 0) newErrors.value = 'Insira um valor válido';
     if (!date) newErrors.date = 'Selecione uma data';
     
     setErrors(newErrors);
@@ -149,7 +173,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
         type,
         transactionType,
         category,
-        value: parseFloat(value),
+        value: parseCurrencyValue(value),
         date,
         description,
         isExpense: type === 'despesa'
@@ -231,11 +255,13 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
         <FormGroup>
           <Label>Valor</Label>
           <Input
-            type="number"
+            type="text"
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => setValue(formatCurrencyInput(e.target.value))}
             error={errors.value}
             className="joyride-valor"
+            inputMode="decimal"
+            placeholder="0,00"
           />
           {errors.value && <ErrorMessage>{errors.value}</ErrorMessage>}
         </FormGroup>

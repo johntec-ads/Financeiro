@@ -9,13 +9,36 @@ function NovoDocumentoForm() {
   const [categoria, setCategoria] = useState('');
   const [descricao, setDescricao] = useState('');
 
+  const parseCurrencyValue = (formattedValue) => {
+    if (!formattedValue) return 0;
+
+    const normalizedValue = formattedValue
+      .replace(/\./g, '')
+      .replace(',', '.');
+
+    return Number(normalizedValue) || 0;
+  };
+
+  const formatCurrencyInput = (inputValue) => {
+    const digitsOnly = inputValue.replace(/\D/g, '');
+
+    if (!digitsOnly) return '';
+
+    const numericValue = Number(digitsOnly) / 100;
+
+    return numericValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       await addDoc(collection(db, "transacoes"), { // Mudando para "transacoes"
         tipo: tipo,
-        valor: parseFloat(valor), // Converte para número
+        valor: parseCurrencyValue(valor),
         data: data,
         categoria: categoria,
         descricao: descricao
@@ -45,9 +68,11 @@ function NovoDocumentoForm() {
       <label>
         Valor:
         <input
-          type="number"
+          type="text"
           value={valor}
-          onChange={(e) => setValor(e.target.value)}
+          onChange={(e) => setValor(formatCurrencyInput(e.target.value))}
+          inputMode="decimal"
+          placeholder="0,00"
         />
       </label>
       <br />

@@ -277,6 +277,40 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTransaction, setCurrentTransaction] = useState(null);
 
+  const parseCurrencyValue = (formattedValue) => {
+    if (!formattedValue) return 0;
+
+    const normalizedValue = String(formattedValue)
+      .replace(/\./g, '')
+      .replace(',', '.');
+
+    return Number(normalizedValue) || 0;
+  };
+
+  const formatCurrencyInput = (inputValue) => {
+    const digitsOnly = String(inputValue).replace(/\D/g, '');
+
+    if (!digitsOnly) return '';
+
+    const numericValue = Number(digitsOnly) / 100;
+
+    return numericValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
+  const formatCurrencyFromNumber = (numericValue) => {
+    if (numericValue === null || numericValue === undefined || numericValue === '') {
+      return '';
+    }
+
+    return Number(numericValue).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
   const sortTransactions = (transactions) => {
     return [...transactions].sort((a, b) => {
       if (a.type !== b.type) {
@@ -323,13 +357,19 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
   };
 
   const handleEdit = (transaction) => {
-    setCurrentTransaction(transaction);
+    setCurrentTransaction({
+      ...transaction,
+      value: formatCurrencyFromNumber(transaction.value)
+    });
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
     if (currentTransaction) {
-      updateTransaction(currentTransaction.id, currentTransaction);
+      updateTransaction(currentTransaction.id, {
+        ...currentTransaction,
+        value: parseCurrencyValue(currentTransaction.value)
+      });
     }
     setIsModalOpen(false);
   };
@@ -359,11 +399,16 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
           <Label>
             Valor:
             <Input
-              type="number"
+              type="text"
               value={currentTransaction?.value || ''}
               onChange={(e) =>
-                setCurrentTransaction({ ...currentTransaction, value: parseFloat(e.target.value) })
+                setCurrentTransaction({
+                  ...currentTransaction,
+                  value: formatCurrencyInput(e.target.value)
+                })
               }
+              inputMode="decimal"
+              placeholder="0,00"
             />
           </Label>
           <Label>
