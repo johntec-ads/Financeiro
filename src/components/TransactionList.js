@@ -4,6 +4,81 @@ import { FaTrash, FaEdit, FaCheck } from 'react-icons/fa';
 import Modal from './Modal';
 import { formatCurrencyFromNumber, formatCurrencyInput, parseCurrencyValue } from '../utils/currency';
 
+const FilterBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const MobileFilterWrapper = styled.div`
+  display: none;
+  margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const ToggleFiltersButton = styled.button`
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+`;
+
+const MobileFiltersPanel = styled.div`
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 0.75rem;
+`;
+
+const FilterField = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const FilterLabel = styled.label`
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+`;
+
+const FilterSelect = styled.select`
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--text);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+`;
+
+const FilterScopeText = styled.span`
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+`;
+
 const TableContainer = styled.div`
   background-color: var(--card-bg);
   border-radius: var(--radius-lg);
@@ -205,11 +280,12 @@ const MobileDueTag = styled(DueTag)`
 
 const getDueStatus = (date, paid) => {
   if (paid) return null;
-  
-  const today = new Date();
-  const dueDate = new Date(date);
-  const threeDaysFromNow = new Date();
-  threeDaysFromNow.setDate(today.getDate() + 3);
+
+  const [year, month, day] = date.split('-').map(Number);
+  const dueDate = new Date(year, month - 1, day);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const threeDaysFromNow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3, 23, 59, 59, 999);
 
   if (dueDate < today) return { type: 'overdue', text: 'Vencido' };
   if (dueDate <= threeDaysFromNow) return { type: 'dueSoon', text: 'Próximo' };
@@ -265,21 +341,76 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTransaction, setCurrentTransaction] = useState(null);
+  const [dueFilter, setDueFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('dueDate');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const sortTransactions = (transactions) => {
-    return [...transactions].sort((a, b) => {
-      if (a.type !== b.type) {
-        return a.type === 'receita' ? -1 : 1;
+  const parseLocalDate = (dateString) => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const getStartOfDay = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
+
+  const getEndOfDay = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+  };
+
+  const filterAndSortTransactions = (transactionsList) => {
+    const todayStart = getStartOfDay(new Date());
+    const dueSoonLimit = getEndOfDay(new Date(todayStart.getFullYear(), todayStart.getMonth(), todayStart.getDate() + 3));
+    const incomeTransactions = transactionsList.filter((transaction) => transaction.type === 'receita');
+    const expenseTransactions = transactionsList.filter((transaction) => transaction.type === 'despesa');
+
+    const filteredExpenses = expenseTransactions.filter((transaction) => {
+      if (dueFilter === 'paid') {
+        return transaction.paid;
       }
-      
-      if (a.type === 'despesa') {
-        if (a.paid !== b.paid) {
-          return a.paid ? 1 : -1;
-        }
+
+      if (dueFilter === 'unpaid') {
+        return !transaction.paid;
       }
-      
-      return 0;
+
+      if (dueFilter === 'overdue') {
+        if (transaction.paid) return false;
+        return parseLocalDate(transaction.date) < todayStart;
+      }
+
+      if (dueFilter === 'dueSoon') {
+        if (transaction.paid) return false;
+        const dueDate = parseLocalDate(transaction.date);
+        return dueDate >= todayStart && dueDate <= dueSoonLimit;
+      }
+
+      return true;
     });
+
+    const sortedExpenses = [...filteredExpenses].sort((a, b) => {
+      if (sortBy === 'highestValue') {
+        return (Number(b.value) || 0) - (Number(a.value) || 0);
+      }
+
+      if (sortBy === 'lowestValue') {
+        return (Number(a.value) || 0) - (Number(b.value) || 0);
+      }
+
+      // Padrão: não pagas primeiro, vencimento mais próximo antes e maior valor como desempate
+      if (a.paid !== b.paid) {
+        return a.paid ? 1 : -1;
+      }
+
+      const aDate = parseLocalDate(a.date);
+      const bDate = parseLocalDate(b.date);
+      if (aDate.getTime() !== bDate.getTime()) {
+        return aDate - bDate;
+      }
+
+      return (Number(b.value) || 0) - (Number(a.value) || 0);
+    });
+
+    return [...incomeTransactions, ...sortedExpenses];
   };
 
   const handleDelete = async (id) => {
@@ -342,6 +473,8 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
     return <LoadingMessage>Nenhuma transação encontrada para o período selecionado.</LoadingMessage>;
   }
 
+  const visibleTransactions = filterAndSortTransactions(transactions);
+
   return (
     <>
       <Modal
@@ -389,6 +522,76 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
         </ModalBody>
       </Modal>
 
+      <FilterBar>
+        <FilterField>
+          <FilterLabel htmlFor="due-filter-desktop">Vencimento</FilterLabel>
+          <FilterSelect
+            id="due-filter-desktop"
+            value={dueFilter}
+            onChange={(e) => setDueFilter(e.target.value)}
+          >
+            <option value="all">Todos</option>
+            <option value="overdue">Vencidos</option>
+            <option value="dueSoon">Próximos 3 dias</option>
+            <option value="unpaid">Não pagos</option>
+            <option value="paid">Pagos</option>
+          </FilterSelect>
+        </FilterField>
+
+        <FilterField>
+          <FilterLabel htmlFor="sort-by-desktop">Ordenar por</FilterLabel>
+          <FilterSelect
+            id="sort-by-desktop"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="dueDate">Vencimento</option>
+            <option value="highestValue">Maior valor</option>
+            <option value="lowestValue">Menor valor</option>
+          </FilterSelect>
+        </FilterField>
+
+        <FilterScopeText>Filtros aplicados apenas em despesas</FilterScopeText>
+      </FilterBar>
+
+      <MobileFilterWrapper>
+        <ToggleFiltersButton type="button" onClick={() => setShowMobileFilters((prev) => !prev)}>
+          {showMobileFilters ? 'Ocultar filtros de despesas' : 'Mostrar filtros de despesas'}
+        </ToggleFiltersButton>
+
+        {showMobileFilters && (
+          <MobileFiltersPanel>
+            <FilterField>
+              <FilterLabel htmlFor="due-filter-mobile">Vencimento</FilterLabel>
+              <FilterSelect
+                id="due-filter-mobile"
+                value={dueFilter}
+                onChange={(e) => setDueFilter(e.target.value)}
+              >
+                <option value="all">Todos</option>
+                <option value="overdue">Vencidos</option>
+                <option value="dueSoon">Próximos 3 dias</option>
+                <option value="unpaid">Não pagos</option>
+                <option value="paid">Pagos</option>
+              </FilterSelect>
+            </FilterField>
+
+            <FilterField>
+              <FilterLabel htmlFor="sort-by-mobile">Ordenar por</FilterLabel>
+              <FilterSelect
+                id="sort-by-mobile"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="dueDate">Vencimento</option>
+                <option value="highestValue">Maior valor</option>
+                <option value="lowestValue">Menor valor</option>
+              </FilterSelect>
+            </FilterField>
+          </MobileFiltersPanel>
+        )}
+      </MobileFilterWrapper>
+
       <TableContainer>
         <Table>
           <thead>
@@ -403,7 +606,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
             </tr>
           </thead>
           <tbody>
-            {sortTransactions(transactions).map(transaction => {
+            {visibleTransactions.map(transaction => {
               return (
                 <tr key={transaction.id}>
                   <Td>
@@ -458,7 +661,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
       </TableContainer>
 
       <MobileContainer>
-        {sortTransactions(transactions).map(transaction => (
+        {visibleTransactions.map(transaction => (
           <MobileCard key={transaction.id}>
             <MobileStatusContainer>
               <PaidButton
