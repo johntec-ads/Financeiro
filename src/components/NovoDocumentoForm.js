@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { db } from '../services/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { formatCurrencyInput, parseCurrencyValue } from '../utils/currency';
 
 function NovoDocumentoForm() {
   const [tipo, setTipo] = useState('receita'); // Valor padrão
@@ -8,29 +9,6 @@ function NovoDocumentoForm() {
   const [data, setData] = useState('');
   const [categoria, setCategoria] = useState('');
   const [descricao, setDescricao] = useState('');
-
-  const parseCurrencyValue = (formattedValue) => {
-    if (!formattedValue) return 0;
-
-    const normalizedValue = formattedValue
-      .replace(/\./g, '')
-      .replace(',', '.');
-
-    return Number(normalizedValue) || 0;
-  };
-
-  const formatCurrencyInput = (inputValue) => {
-    const digitsOnly = inputValue.replace(/\D/g, '');
-
-    if (!digitsOnly) return '';
-
-    const numericValue = Number(digitsOnly) / 100;
-
-    return numericValue.toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

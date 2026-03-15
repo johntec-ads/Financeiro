@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaTrash, FaEdit, FaCheck } from 'react-icons/fa';
 import Modal from './Modal';
+import { formatCurrencyFromNumber, formatCurrencyInput, parseCurrencyValue } from '../utils/currency';
 
 const TableContainer = styled.div`
   background-color: var(--card-bg);
@@ -114,12 +115,6 @@ const MobileStatusContainer = styled.div`
   gap: 0.3rem;
 `;
 
-const StatusLegend = styled.span`
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-  text-align: center;
-`;
-
 const MobileContentContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -180,13 +175,6 @@ const TableButtonsContainer = styled.div`
   @media (max-width: 768px) {
     justify-content: center;
   }
-`;
-
-const TableStatusContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
 `;
 
 const MobileValueSection = styled.div`
@@ -276,40 +264,6 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentTransaction, setCurrentTransaction] = useState(null);
-
-  const parseCurrencyValue = (formattedValue) => {
-    if (!formattedValue) return 0;
-
-    const normalizedValue = String(formattedValue)
-      .replace(/\./g, '')
-      .replace(',', '.');
-
-    return Number(normalizedValue) || 0;
-  };
-
-  const formatCurrencyInput = (inputValue) => {
-    const digitsOnly = String(inputValue).replace(/\D/g, '');
-
-    if (!digitsOnly) return '';
-
-    const numericValue = Number(digitsOnly) / 100;
-
-    return numericValue.toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
-
-  const formatCurrencyFromNumber = (numericValue) => {
-    if (numericValue === null || numericValue === undefined || numericValue === '') {
-      return '';
-    }
-
-    return Number(numericValue).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
 
   const sortTransactions = (transactions) => {
     return [...transactions].sort((a, b) => {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { expenseCategories, incomeCategories } from '../constants/categories';
 import { transactionTypes } from '../constants/transactionTypes';
+import { formatCurrencyInput, parseCurrencyValue } from '../utils/currency';
 
 const FormContainer = styled.div`
   background-color: var(--card-bg);
@@ -120,29 +121,6 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [errors, setErrors] = useState({});
-
-  const parseCurrencyValue = (formattedValue) => {
-    if (!formattedValue) return 0;
-
-    const normalizedValue = formattedValue
-      .replace(/\./g, '')
-      .replace(',', '.');
-
-    return Number(normalizedValue) || 0;
-  };
-
-  const formatCurrencyInput = (inputValue) => {
-    const digitsOnly = inputValue.replace(/\D/g, '');
-
-    if (!digitsOnly) return '';
-
-    const numericValue = Number(digitsOnly) / 100;
-
-    return numericValue.toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
 
   const validateForm = () => {
     const newErrors = {};
