@@ -43,6 +43,7 @@ const Td = styled.td`
   
   ${props => props.paid && `
     color: var(--text-secondary);
+    text-decoration: line-through;
   `}
 `;
 
