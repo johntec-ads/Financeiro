@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { expenseCategories, incomeCategories } from '../constants/categories';
+import { transactionCategories } from '../constants/categories';
 import { transactionTypes } from '../constants/transactionTypes';
 import { formatCurrencyInput, parseCurrencyValue } from '../utils/currency';
 
@@ -113,7 +113,7 @@ const ErrorMessage = styled.span`
 
 const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const [type, setType] = useState('receita');
-  const [transactionType, setTransactionType] = useState('Pessoal');
+  const [transactionType, setTransactionType] = useState('');
   const [category, setCategory] = useState('');
   const [value, setValue] = useState('');
   const [date, setDate] = useState('');
@@ -160,8 +160,8 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
       await addTransaction(transaction);
       setFeedback('Transação adicionada com sucesso!');
       
-      // Limpar formulário
-      setType('receita');
+      // Preserve o tipo atual para facilitar lançamentos consecutivos.
+      setTransactionType('');
       setCategory('');
       setValue('');
       setDate('');
@@ -182,7 +182,10 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
           <Label>Tipo</Label>
           <Select 
             value={type} 
-            onChange={(e) => setType(e.target.value)}
+            onChange={(e) => {
+              setType(e.target.value);
+              setCategory('');
+            }}
             error={errors.type}
             className="joyride-tipo"
           >
@@ -197,7 +200,10 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
           <Label>Grupo</Label>
           <Select 
             value={transactionType} 
-            onChange={(e) => setTransactionType(e.target.value)}
+            onChange={(e) => {
+              setTransactionType(e.target.value);
+              setCategory('');
+            }}
             error={errors.transactionType}
             className="joyride-grupo"
           >
@@ -216,16 +222,14 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
             onChange={(e) => setCategory(e.target.value)}
             error={errors.category}
             className="joyride-categoria"
+            disabled={!transactionType}
           >
-            <option value="">Selecione uma categoria</option>
-            {type === 'receita' 
-              ? incomeCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))
-              : expenseCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))
-            }
+            <option value="">
+              {transactionType ? 'Selecione uma categoria' : 'Selecione um grupo primeiro'}
+            </option>
+            {(transactionCategories[type]?.[transactionType] || []).map(categoryOption => (
+              <option key={categoryOption} value={categoryOption}>{categoryOption}</option>
+            ))}
           </Select>
           {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
         </FormGroup>

@@ -7,7 +7,22 @@ import {
   Legend
 } from 'chart.js';
 import { Pie } from 'react-chartjs-2';//Lib para gráficos de pizza
-import { expenseCategories, incomeCategories } from '../constants/categories';
+import {
+  expenseCategories,
+  incomeCategories,
+  transactionCategories,
+} from '../constants/categories';
+
+const categoriesByType = {
+  receita: Array.from(new Set([
+    ...incomeCategories,
+    ...Object.values(transactionCategories.receita).flat(),
+  ])),
+  despesa: Array.from(new Set([
+    ...expenseCategories,
+    ...Object.values(transactionCategories.despesa).flat(),
+  ])),
+};
 
 ChartJS.register(
   ArcElement,
@@ -60,8 +75,8 @@ const Checkbox = styled.label`
 
 const Charts = ({ transactions }) => {
   const [selectedCategories, setSelectedCategories] = useState({
-    receita: incomeCategories.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
-    despesa: expenseCategories.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
+    receita: categoriesByType.receita.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
+    despesa: categoriesByType.despesa.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
   });
 
   const toggleCategory = (type, category) => {
@@ -79,7 +94,7 @@ const Charts = ({ transactions }) => {
       return { totals: {}, total: 0 };
     }
 
-    const categories = type === 'receita' ? incomeCategories : expenseCategories;
+    const categories = categoriesByType[type];
     const totals = {};
     let total = 0;
 
@@ -173,7 +188,7 @@ const Charts = ({ transactions }) => {
       <CategoryFilter>
         <div>
           <h4>Receitas</h4>
-          {incomeCategories.map(cat => (
+          {categoriesByType.receita.map(cat => (
             <Checkbox key={cat}>
               <input
                 type="checkbox"
@@ -186,7 +201,7 @@ const Charts = ({ transactions }) => {
         </div>
         <div>
           <h4>Despesas</h4>
-          {expenseCategories.map(cat => (
+          {categoriesByType.despesa.map(cat => (
             <Checkbox key={cat}>
               <input
                 type="checkbox"
