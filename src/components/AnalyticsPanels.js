@@ -1,16 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Bar } from 'react-chartjs-2';
-import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Tooltip,
-} from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const AnalyticsPanelContainer = styled.div`
   display: flex;
@@ -28,96 +17,67 @@ const MetricGrid = styled.div`
   }
 `;
 
-const Panel = styled.section`
+const Metric = styled.div`
   background: var(--card-bg);
-  padding: 1.5rem;
   border: 1px solid var(--border);
+  border-top: 4px solid ${props => props.color};
   border-radius: var(--radius-lg);
+  padding: 1.25rem;
   box-shadow: var(--shadow-sm);
 `;
 
-const Metric = styled(Panel)`
-  border-top: 4px solid ${props => props.color};
-`;
-
-const Eyebrow = styled.span`
+const Label = styled.span`
   display: block;
   color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
 `;
 
-const MetricValue = styled.strong`
+const Value = styled.strong`
   display: block;
   margin-top: 0.35rem;
   color: ${props => props.color};
   font-size: 1.5rem;
 `;
 
-const PanelTitle = styled.h2`
-  margin: 0 0 0.35rem;
-  color: var(--text);
-  font-size: 1.15rem;
-`;
-
-const PanelDescription = styled.p`
-  margin: 0 0 1rem;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-`;
-
-const ChartWrapper = styled.div`
-  height: 320px;
-
-  @media (max-width: 600px) {
-    height: 260px;
-  }
-`;
-
-const GroupList = styled.div`
+const BalancePanel = styled.section`
   display: grid;
-  gap: 0.75rem;
-`;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
 
-const GroupRow = styled.div`
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) repeat(3, minmax(95px, auto));
-  gap: 1rem;
-  align-items: center;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--border);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-const GroupName = styled.strong`
+const BalanceColumn = styled.div`
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: ${props => props.background};
+`;
+
+const BalanceTitle = styled.h2`
+  margin: 0 0 0.5rem;
   color: var(--text);
+  font-size: 1rem;
 `;
 
-const Amount = styled.span`
+const BalanceValue = styled.strong`
   color: ${props => props.color};
-  font-size: 0.9rem;
-  text-align: right;
-
-  @media (max-width: 600px) {
-    text-align: left;
-  }
+  font-size: 1.5rem;
 `;
 
-const EmptyState = styled.p`
-  margin: 0;
-  padding: 1rem 0;
+const Explanation = styled.p`
+  margin: 1rem 0 0;
   color: var(--text-secondary);
-  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.5;
 `;
 
 const formatCurrency = value => new Intl.NumberFormat('pt-BR', {
@@ -125,129 +85,58 @@ const formatCurrency = value => new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 }).format(value);
 
-const AnalyticsPanels = ({ transactions, monthName, year }) => {
-  const groups = transactions.reduce((acc, transaction) => {
-    const group = transaction.transactionType || 'Outros';
-    if (!acc[group]) acc[group] = { receitas: 0, despesas: 0 };
-
+const AnalyticsPanels = ({ transactions, year }) => {
+  const totals = transactions.reduce((acc, transaction) => {
     const value = Number(transaction.value) || 0;
-    if (transaction.type === 'receita') {
-      acc[group].receitas += value;
-    } else if (transaction.type === 'despesa') {
-      acc[group].despesas += value;
-    }
+    if (transaction.type === 'receita') acc.receitas += value;
+    if (transaction.type === 'despesa') acc.despesas += value;
     return acc;
-  }, {});
-
-  const totals = Object.values(groups).reduce(
-    (acc, group) => ({
-      receitas: acc.receitas + group.receitas,
-      despesas: acc.despesas + group.despesas,
-    }),
-    { receitas: 0, despesas: 0 }
-  );
+  }, { receitas: 0, despesas: 0 });
   const saldo = totals.receitas - totals.despesas;
-  const groupNames = Object.keys(groups);
-
-  const chartData = {
-    labels: groupNames,
-    datasets: [
-      {
-        label: 'Receitas',
-        data: groupNames.map(group => groups[group].receitas),
-        backgroundColor: '#10b981',
-        borderRadius: 6,
-      },
-      {
-        label: 'Despesas',
-        data: groupNames.map(group => groups[group].despesas),
-        backgroundColor: '#ef4444',
-        borderRadius: 6,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: value => formatCurrency(value),
-        },
-      },
-    },
-    plugins: {
-      legend: { position: 'bottom' },
-      tooltip: {
-        callbacks: {
-          label: context => `${context.dataset.label}: ${formatCurrency(context.raw)}`,
-        },
-      },
-    },
-  };
 
   return (
     <AnalyticsPanelContainer>
       <MetricGrid>
         <Metric color="var(--success)">
-          <Eyebrow>Receitas no período</Eyebrow>
-          <MetricValue color="var(--success)">{formatCurrency(totals.receitas)}</MetricValue>
+          <Label>Receitas no ano</Label>
+          <Value color="var(--success)">{formatCurrency(totals.receitas)}</Value>
         </Metric>
         <Metric color="var(--danger)">
-          <Eyebrow>Despesas no período</Eyebrow>
-          <MetricValue color="var(--danger)">{formatCurrency(totals.despesas)}</MetricValue>
+          <Label>Despesas no ano</Label>
+          <Value color="var(--danger)">{formatCurrency(totals.despesas)}</Value>
         </Metric>
         <Metric color={saldo >= 0 ? 'var(--primary)' : 'var(--danger)'}>
-          <Eyebrow>Saldo do período</Eyebrow>
-          <MetricValue color={saldo >= 0 ? 'var(--primary)' : 'var(--danger)'}>
+          <Label>Saldo do ano</Label>
+          <Value color={saldo >= 0 ? 'var(--primary)' : 'var(--danger)'}>
             {formatCurrency(saldo)}
-          </MetricValue>
+          </Value>
         </Metric>
       </MetricGrid>
 
-      <Panel>
-        <PanelTitle>Receitas e despesas por grupo</PanelTitle>
-        <PanelDescription>{monthName} de {year}</PanelDescription>
-        {groupNames.length > 0 ? (
-          <ChartWrapper>
-            <Bar data={chartData} options={chartOptions} />
-          </ChartWrapper>
-        ) : (
-          <EmptyState>Nenhuma transação encontrada neste período.</EmptyState>
-        )}
-      </Panel>
+      <BalancePanel>
+        <BalanceColumn background="var(--success-light)">
+          <BalanceTitle>Total de receitas em {year}</BalanceTitle>
+          <BalanceValue color="var(--success)">{formatCurrency(totals.receitas)}</BalanceValue>
+          <Explanation>Todo o dinheiro recebido no período selecionado.</Explanation>
+        </BalanceColumn>
+        <BalanceColumn background="var(--danger-light)">
+          <BalanceTitle>Total de despesas em {year}</BalanceTitle>
+          <BalanceValue color="var(--danger)">{formatCurrency(totals.despesas)}</BalanceValue>
+          <Explanation>Todo o dinheiro lançado como saída no período selecionado.</Explanation>
+        </BalanceColumn>
+      </BalancePanel>
 
-      <Panel>
-        <PanelTitle>Resumo por grupo</PanelTitle>
-        <PanelDescription>Compare entradas, saídas e saldo de cada grupo.</PanelDescription>
-        {groupNames.length > 0 ? (
-          <GroupList>
-            <GroupRow>
-              <Eyebrow>Grupo</Eyebrow>
-              <Eyebrow>Receitas</Eyebrow>
-              <Eyebrow>Despesas</Eyebrow>
-              <Eyebrow>Saldo</Eyebrow>
-            </GroupRow>
-            {groupNames.map(group => {
-              const values = groups[group];
-              return (
-                <GroupRow key={group}>
-                  <GroupName>{group}</GroupName>
-                  <Amount color="var(--success)">{formatCurrency(values.receitas)}</Amount>
-                  <Amount color="var(--danger)">{formatCurrency(values.despesas)}</Amount>
-                  <Amount color={values.receitas - values.despesas >= 0 ? 'var(--primary)' : 'var(--danger)'}>
-                    {formatCurrency(values.receitas - values.despesas)}
-                  </Amount>
-                </GroupRow>
-              );
-            })}
-          </GroupList>
-        ) : (
-          <EmptyState>Nenhum grupo possui movimentações neste período.</EmptyState>
-        )}
-      </Panel>
+      <BalancePanel>
+        <BalanceColumn background="var(--primary-light)">
+          <BalanceTitle>Balanço anual</BalanceTitle>
+          <BalanceValue color={saldo >= 0 ? 'var(--primary)' : 'var(--danger)'}>
+            {formatCurrency(saldo)}
+          </BalanceValue>
+          <Explanation>
+            Resultado de receitas menos despesas. Um valor positivo indica sobra no ano.
+          </Explanation>
+        </BalanceColumn>
+      </BalancePanel>
     </AnalyticsPanelContainer>
   );
 };

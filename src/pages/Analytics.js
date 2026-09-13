@@ -5,7 +5,6 @@ import NavBar from '../components/NavBar';
 import UserHeader from '../components/UserHeader';
 import useTransactions from '../hooks/useTransactions';
 import AnalyticsPanels from '../components/AnalyticsPanels';
-import { transactionTypes } from '../constants/transactionTypes';
 
 const AnalyticsContainer = styled.div`
   max-width: 1200px;
@@ -59,26 +58,13 @@ const Tab = styled.button`
 `;
 
 const Analytics = () => {
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedType, setSelectedType] = useState('');
   const [activeView, setActiveView] = useState('resumo');
   
-  const { transactions, loading, error } = useTransactions(selectedMonth, selectedYear);
-
-  const monthNames = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril',
-    'Maio', 'Junho', 'Julho', 'Agosto',
-    'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
+  const { transactions, loading, error } = useTransactions(null, selectedYear);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, index) => currentYear - index);
-
-  // Filtra transações baseado no tipo selecionado
-  const filteredTransactions = selectedType
-    ? transactions.filter(t => t.transactionType === selectedType)
-    : transactions;
 
   if (loading) {
     return (
@@ -115,17 +101,6 @@ const Analytics = () => {
 
         <FilterContainer>
           <Select 
-            value={selectedMonth} 
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-          >
-            {monthNames.map((month, index) => (
-              <option key={index + 1} value={index + 1}>
-                {month}
-              </option>
-            ))}
-          </Select>
-
-          <Select 
             value={selectedYear} 
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
           >
@@ -134,15 +109,6 @@ const Analytics = () => {
             ))}
           </Select>
 
-          <Select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-          >
-            <option value="">Todos os grupos</option>
-            {transactionTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </Select>
         </FilterContainer>
 
         <TabContainer>
@@ -162,14 +128,12 @@ const Analytics = () => {
 
         {activeView === 'resumo' ? (
           <AnalyticsPanels
-            transactions={filteredTransactions}
-            monthName={monthNames[selectedMonth - 1]}
+            transactions={transactions}
             year={selectedYear}
           />
         ) : (
           <Charts
-            transactions={filteredTransactions}
-            monthName={monthNames[selectedMonth - 1]}
+            transactions={transactions}
             year={selectedYear}
           />
         )}

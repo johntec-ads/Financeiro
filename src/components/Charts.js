@@ -1,247 +1,137 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
+import { Line } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,//Lib para gráficos
-  ArcElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
   Tooltip,
-  Legend
 } from 'chart.js';
-import { Pie } from 'react-chartjs-2';//Lib para gráficos de pizza
-import {
-  expenseCategories,
-  incomeCategories,
-  transactionCategories,
-} from '../constants/categories';
-
-const categoriesByType = {
-  receita: Array.from(new Set([
-    ...incomeCategories,
-    ...Object.values(transactionCategories.receita).flat(),
-  ])),
-  despesa: Array.from(new Set([
-    ...expenseCategories,
-    ...Object.values(transactionCategories.despesa).flat(),
-  ])),
-};
 
 ChartJS.register(
-  ArcElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
   Tooltip,
   Legend
 );
 
-const ChartContainer = styled.div`
-  background-color: var(--card-bg);
+const ChartContainer = styled.section`
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
-  border-radius: 12px;
-  margin: 1rem 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+`;
+
+const ChartTitle = styled.h2`
+  margin: 0;
+  color: var(--text);
+  font-size: 1.15rem;
 `;
 
 const ChartDescription = styled.p`
-  margin: -0.5rem 0 1rem;
+  margin: 0.35rem 0 1.25rem;
   color: var(--text-secondary);
   font-size: 0.9rem;
+`;
+
+const ChartWrapper = styled.div`
+  height: 390px;
+
+  @media (max-width: 600px) {
+    height: 280px;
+  }
+`;
+
+const EmptyState = styled.p`
+  padding: 2rem 0;
+  color: var(--text-secondary);
   text-align: center;
 `;
 
-const ChartsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
-`;
+const Charts = ({ transactions, year }) => {
+  const months = [
+    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+  ];
+  const monthly = months.map((_, month) => transactions.reduce((acc, transaction) => {
+    const transactionMonth = new Date(transaction.date).getMonth();
+    if (transactionMonth !== month) return acc;
+    const value = Number(transaction.value) || 0;
+    if (transaction.type === 'receita') acc.receitas += value;
+    if (transaction.type === 'despesa') acc.despesas += value;
+    return acc;
+  }, { receitas: 0, despesas: 0 }));
 
-const ChartTitle = styled.h3`
-  text-align: center;
-  margin-bottom: 1rem;
-  color: var(--text);
-`;
-
-const TotalValue = styled.p`
-  text-align: center;
-  font-size: 1.2rem;
-  margin-top: 1rem;
-  color: ${props => props.type === 'receita' ? 'var(--success)' : 'var(--danger)'};
-`;
-
-const CategoryFilter = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-`;
-
-const Checkbox = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: var(--text);
-`;
-
-const Charts = ({ transactions, monthName, year }) => {
-  const [selectedCategories, setSelectedCategories] = useState({
-    receita: categoriesByType.receita.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
-    despesa: categoriesByType.despesa.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
-  });
-
-  const toggleCategory = (type, category) => {
-    setSelectedCategories(prev => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        [category]: !prev[type][category],
+  const hasData = monthly.some(month => month.receitas > 0 || month.despesas > 0);
+  const data = {
+    labels: months,
+    datasets: [
+      {
+        label: 'Receitas',
+        data: monthly.map(month => month.receitas),
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.16)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
       },
-    }));
+      {
+        label: 'Despesas',
+        data: monthly.map(month => month.despesas),
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239, 68, 68, 0.12)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+      },
+    ],
   };
-
-  const calculateCategoryTotals = (type) => {
-    if (!Array.isArray(transactions)) {
-      return { totals: {}, total: 0 };
-    }
-
-    const categories = categoriesByType[type];
-    const totals = {};
-    let total = 0;
-
-    categories.forEach(cat => {
-      if (!selectedCategories[type][cat]) return; // Ignorar categorias desmarcadas
-
-      const categoryTotal = transactions
-        .filter(t => t.type === type && t.category === cat)
-        .reduce((sum, t) => {
-          const valor = Number(t.value) || 0; // Garantir que o campo 'value' seja usado corretamente
-          return sum + valor;
-        }, 0);
-
-      if (categoryTotal > 0) {
-        totals[cat] = categoryTotal;
-        total += categoryTotal;
-      }
-    });
-
-    return { totals, total };
-  };
-
-  const createChartData = (type) => {
-    const { totals, total } = calculateCategoryTotals(type);
-    
-    if (total === 0) {
-      return {
-        labels: ['Sem dados'],
-        datasets: [{
-          data: [1],
-          backgroundColor: ['#e0e0e0'],
-          borderWidth: 1,
-        }]
-      };
-    }
-
-    const labels = Object.keys(totals);
-    const data = Object.values(totals);
-    
-    const labelsWithPercentage = labels.map((label, index) => {
-      const percentage = ((data[index] / total) * 100).toFixed(1);
-      return `${label} (${percentage}%)`;
-    });
-
-    const colorPalette = type === 'receita'
-      ? ['#2E7D32', '#388E3C', '#43A047', '#4CAF50', '#66BB6A', '#81C784']
-      : ['#C62828', '#D32F2F', '#E53935', '#F44336', '#EF5350', '#E57373', '#EF9A9A', '#FFCDD2'];
-    const colors = data.map((_, index) => colorPalette[index % colorPalette.length]);
-
-    return {
-      labels: labelsWithPercentage,
-      datasets: [{
-        data: data,
-        backgroundColor: colors.slice(0, data.length),
-        borderWidth: 1
-      }]
-    };
-  };
-
   const options = {
-    plugins: {
-      legend: {
-        position: 'right',
-        labels: {
-          font: {
-            size: 12
-          },
-          padding: 20
-        }
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: value => `R$ ${Number(value).toLocaleString('pt-BR')}`,
+        },
       },
+    },
+    plugins: {
+      legend: { position: 'bottom' },
       tooltip: {
         callbacks: {
-          label: function(context) {
-            if (context.raw === 1 && context.label === 'Sem dados') {
-              return 'Nenhuma transação registrada';
-            }
-            const value = context.raw;
-            return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-          }
-        }
-      }
+          label: context => `${context.dataset.label}: R$ ${Number(context.raw).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+          })}`,
+        },
+      },
     },
-    maintainAspectRatio: true,
-    responsive: true
   };
 
-  const { total: totalDespesas } = calculateCategoryTotals('despesa');
-  const { total: totalReceitas } = calculateCategoryTotals('receita');
-
   return (
-    <>
-      <CategoryFilter>
-        <div>
-          <h4>Receitas</h4>
-          {categoriesByType.receita.map(cat => (
-            <Checkbox key={cat}>
-              <input
-                type="checkbox"
-                checked={selectedCategories.receita[cat]}
-                onChange={() => toggleCategory('receita', cat)}
-              />
-              {cat}
-            </Checkbox>
-          ))}
-        </div>
-        <div>
-          <h4>Despesas</h4>
-          {categoriesByType.despesa.map(cat => (
-            <Checkbox key={cat}>
-              <input
-                type="checkbox"
-                checked={selectedCategories.despesa[cat]}
-                onChange={() => toggleCategory('despesa', cat)}
-              />
-              {cat}
-            </Checkbox>
-          ))}
-        </div>
-      </CategoryFilter>
-
-      <ChartsGrid>
-        <ChartContainer>
-          <ChartTitle>Despesas por Categoria</ChartTitle>
-          <ChartDescription>{monthName} de {year}</ChartDescription>
-          <Pie data={createChartData('despesa')} options={options} />
-          <TotalValue type="despesa">
-            Total: R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </TotalValue>
-        </ChartContainer>
-        
-        <ChartContainer>
-          <ChartTitle>Receitas por Categoria</ChartTitle>
-          <ChartDescription>{monthName} de {year}</ChartDescription>
-          <Pie data={createChartData('receita')} options={options} />
-          <TotalValue type="receita">
-            Total: R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </TotalValue>
-        </ChartContainer>
-      </ChartsGrid>
-    </>
+    <ChartContainer>
+      <ChartTitle>Evolução financeira</ChartTitle>
+      <ChartDescription>
+        Comparativo mensal de receitas e despesas em {year}.
+      </ChartDescription>
+      {hasData ? (
+        <ChartWrapper>
+          <Line data={data} options={options} />
+        </ChartWrapper>
+      ) : (
+        <EmptyState>Nenhuma movimentação registrada em {year}.</EmptyState>
+      )}
+    </ChartContainer>
   );
 };
 

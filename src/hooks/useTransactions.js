@@ -45,7 +45,7 @@ const useTransactions = (selectedMonth, selectedYear) => {
             const transactionYear = transactionDate.getFullYear();
 
             return (
-              transactionMonth === parseInt(selectedMonth) &&
+              (!selectedMonth || transactionMonth === parseInt(selectedMonth)) &&
               transactionYear === parseInt(selectedYear)
             );
           });
