@@ -14,7 +14,13 @@ const AnalyticsContainer = styled.div`
 
 const Title = styled.h1`
   color: var(--primary);
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+`;
+
+const Subtitle = styled.p`
+  margin: 0 0 2rem;
+  color: var(--text-secondary);
   text-align: center;
 `;
 
@@ -72,7 +78,8 @@ const Analytics = () => {
         <UserHeader />
         <NavBar />
         <AnalyticsContainer>
-          <Title>Análise Financeira</Title>
+          <Title>Análise anual</Title>
+          <Subtitle>Veja a evolução das receitas, despesas e do saldo ao longo do ano.</Subtitle>
           <p>Carregando análises...</p>
         </AnalyticsContainer>
       </>
@@ -85,7 +92,8 @@ const Analytics = () => {
         <UserHeader />
         <NavBar />
         <AnalyticsContainer>
-          <Title>Análise Financeira</Title>
+          <Title>Análise anual</Title>
+          <Subtitle>Veja a evolução das receitas, despesas e do saldo ao longo do ano.</Subtitle>
           <p>Erro ao carregar dados: {error.message}</p>
         </AnalyticsContainer>
       </>
@@ -97,7 +105,8 @@ const Analytics = () => {
       <UserHeader />
       <NavBar />
       <AnalyticsContainer>
-        <Title>Análise Financeira</Title>
+        <Title>Análise anual</Title>
+        <Subtitle>Veja a evolução das receitas, despesas e do saldo ao longo do ano.</Subtitle>
 
         <FilterContainer>
           <Select 

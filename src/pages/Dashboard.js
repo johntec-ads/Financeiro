@@ -49,6 +49,13 @@ const Title = styled.h1`
   }
 `;
 
+const Subtitle = styled.p`
+  margin-top: -1.5rem;
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+  text-align: center;
+`;
+
 const TutorialButton = styled.button`
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -294,7 +301,8 @@ const Dashboard = () => {
           />
           <UserHeader />
           <TitleContainer>
-            <Title>Controle Financeiro</Title>
+            <Title>Resumo mensal</Title>
+            <Subtitle>Acompanhe suas movimentações e resultados do mês selecionado.</Subtitle>
             <TutorialButton onClick={() => setRunTutorial(true)} aria-label="Iniciar tutorial">
               <FaQuestionCircle />
               <span>Tutorial</span>

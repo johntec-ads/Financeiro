@@ -67,13 +67,13 @@ const NavBar = () => {
         <li>
           <StyledNavLink to="/dashboard">
             <FiGrid />
-            <span>Dashboard</span>
+            <span>Resumo mensal</span>
           </StyledNavLink>
         </li>
         <li>
           <StyledNavLink to="/analytics" className="analytics-tab">
             <FiPieChart />
-            <span>Análise</span>
+            <span>Análise anual</span>
           </StyledNavLink>
         </li>
       </NavList>
