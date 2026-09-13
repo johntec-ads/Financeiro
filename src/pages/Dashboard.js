@@ -152,14 +152,14 @@ const CustomJoyrideStyles = {
     borderRadius: 16,
     padding: '1.5rem',
     fontSize: 15,
-    width: 380,
+    width: 400,
     boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
   },
   tooltip: {
     borderRadius: 16,
-    padding: '1.5rem',
+    padding: '1.25rem',
     fontSize: 15,
-    maxWidth: 380,
+    maxWidth: 400,
     boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
   },
   buttonNext: {
@@ -167,8 +167,9 @@ const CustomJoyrideStyles = {
     borderRadius: 8,
     fontWeight: 600,
     fontSize: 14,
-    padding: '0.6rem 1rem',
+    padding: '0.65rem 1.1rem',
     color: '#fff',
+    boxShadow: '0 4px 10px rgb(99 102 241 / 0.25)',
   },
   buttonBack: {
     color: '#6366f1',
@@ -181,6 +182,9 @@ const CustomJoyrideStyles = {
     fontWeight: 600,
     fontSize: 14,
     padding: '0.6rem 1rem',
+  },
+  beacon: {
+    display: 'none',
   },
 };
 
@@ -211,65 +215,114 @@ const Dashboard = () => {
 
   const stepsDesktop = [
     {
-      target: '.joyride-tipo',
-      content: 'Comece por aqui! Defina se a transação é uma **Receita** (dinheiro que entra) ou uma **Despesa** (dinheiro que sai). Esta é a base para organizar suas finanças.',
+      target: '.navbar',
+      title: 'Navegação do sistema',
+      content: (
+        <>
+          Use <strong>Resumo mensal</strong> para lançar e acompanhar as movimentações do mês.
+          A <strong>Análise anual</strong> mostra a evolução de receitas, despesas e saldo ao longo do ano.
+        </>
+      ),
       disableBeacon: true,
     },
     {
+      target: '.joyride-tipo',
+      title: '1. Defina o tipo',
+      content: (
+        <>
+          Escolha <strong>Receita</strong> para o dinheiro que entra ou <strong>Despesa</strong> para o dinheiro que sai.
+          O tipo fica selecionado para facilitar lançamentos consecutivos.
+        </>
+      ),
+    },
+    {
       target: '.joyride-grupo',
-      content: 'Agora, agrupe sua transação. Pertence a algo **Pessoal**, do **Trabalho** ou outra área? Agrupar ajuda a ter uma visão geral de onde seu dinheiro está circulando.',
+      title: '2. Escolha o grupo',
+      content: (
+        <>
+          Selecione a área da movimentação, como <strong>Pessoal</strong>, <strong>Trabalho</strong>,
+          <strong> Família</strong> ou <strong>Investimentos</strong>.
+        </>
+      ),
     },
     {
       target: '.joyride-categoria',
-      content: 'Seja específico! Escolha uma **categoria** como "Alimentação", "Transporte" ou "Salário". Quanto mais detalhado, melhores e mais úteis serão seus relatórios financeiros.',
+      title: '3. Detalhe a categoria',
+      content: (
+        <>
+          As categorias dependem do <strong>Tipo</strong> e do <strong>Grupo</strong>.
+          Primeiro escolha o Grupo; depois selecione a categoria mais adequada.
+        </>
+      ),
     },
     {
       target: '.joyride-valor',
-      content: 'Qual o **valor** desta transação? Insira o montante usando o formato de moeda local. Este é o coração do seu controle financeiro!',
+      title: '4. Informe o valor',
+      content: 'Digite o valor da movimentação. Use o formato de moeda local, por exemplo, 1.250,00.',
     },
     {
       target: '.joyride-data',
-      content: 'Quando esta transação aconteceu ou está agendada? Selecione a **data** correta para manter seu fluxo de caixa sempre preciso e organizado.',
+      title: '5. Informe a data',
+      content: 'Selecione quando a movimentação aconteceu. A data define em qual mês e ano ela aparecerá nos resumos.',
     },
     {
       target: '.joyride-descricao',
-      content: 'Tem algum detalhe que vale a pena lembrar? Adicione uma **descrição** curta. Por exemplo: "Almoço com cliente" ou "Conta de luz de Maio". Ajuda muito na hora de revisar seus gastos!',
+      title: '6. Adicione uma descrição',
+      content: (
+        <>
+          Este campo é opcional. Use uma descrição curta para facilitar consultas futuras,
+          como <strong>Almoço com cliente</strong> ou <strong>Conta de luz</strong>.
+        </>
+      ),
     },
     {
       target: '.add-transaction-btn',
-      content: 'Tudo pronto! Clique aqui para **salvar** sua nova transação e vê-la registrada na sua lista. Parabéns por manter o controle de suas finanças!',
+      title: '7. Salve o lançamento',
+      content: 'Confira os dados e clique aqui para registrar a movimentação na lista do resumo mensal.',
     },
   ];
 
   const stepsMobile = [
     {
-      target: '.joyride-tipo',
-      content: 'É uma **Receita** (entrada) ou **Despesa** (saída)? Comece por aqui para organizar a transação.',
+      target: '.navbar',
+      title: 'Navegação',
+      content: 'Use Resumo mensal para os lançamentos e Análise anual para acompanhar o ano.',
       disableBeacon: true,
     },
     {
+      target: '.joyride-tipo',
+      title: '1. Tipo',
+      content: 'Escolha Receita (entrada) ou Despesa (saída). O tipo permanece selecionado no próximo lançamento.',
+    },
+    {
       target: '.joyride-grupo',
-      content: 'Agrupe a transação. É algo **Pessoal**, do **Trabalho**, etc? Isso ajuda a dar uma visão geral.',
+      title: '2. Grupo',
+      content: 'Escolha o grupo da movimentação, como Pessoal, Trabalho, Família ou Investimentos.',
     },
     {
       target: '.joyride-categoria',
-      content: 'Escolha uma **categoria** (ex: "Alimentação", "Salário"). Detalhes geram relatórios melhores!',
+      title: '3. Categoria',
+      content: 'Escolha o Grupo primeiro. As categorias disponíveis mudam conforme o Tipo e o Grupo.',
     },
     {
       target: '.joyride-valor',
-      content: 'Qual o **valor** da transação? Insira o montante para seu controle financeiro.',
+      title: '4. Valor',
+      content: 'Digite o valor da movimentação.',
     },
     {
       target: '.joyride-data',
-      content: 'Selecione a **data** da transação para manter seu fluxo de caixa preciso.',
+      title: '5. Data',
+      content: 'A data define o mês do Resumo mensal e o ano da Análise anual.',
     },
     {
       target: '.joyride-descricao',
-      content: 'Adicione uma **descrição** curta para lembrar dos detalhes. (Opcional)',
+      title: '6. Descrição opcional',
+      content: 'Adicione uma observação curta para encontrar este lançamento com mais facilidade depois.',
     },
     {
       target: '.add-transaction-btn',
-      content: 'Pronto! Clique para **salvar** a transação na sua lista.',
+      title: '7. Salvar',
+      content: 'Confira os dados e toque aqui para salvar.',
     },
   ];
 

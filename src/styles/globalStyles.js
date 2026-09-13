@@ -110,6 +110,14 @@ export const GlobalStyle = createGlobalStyle`
     margin-bottom: 0.7rem;
     text-align: center;
   }
+  .react-joyride__tooltip-title {
+    width: 100%;
+    margin: 0 0 0.6rem;
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-align: left;
+  }
   .react-joyride__tooltip-footer {
     display: flex;
     flex-direction: row;
@@ -130,6 +138,9 @@ export const GlobalStyle = createGlobalStyle`
     }
     .react-joyride__tooltip-content {
       margin-bottom: 0.5rem;
+    }
+    .react-joyride__tooltip-title {
+      font-size: 1rem;
     }
     .react-joyride__tooltip-footer button {
       font-size: 0.95em;
