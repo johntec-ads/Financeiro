@@ -35,7 +35,13 @@ const TitleContainer = styled.div`
   }
 `;
 
+const HeadingBlock = styled.div`
+  min-width: 0;
+  text-align: center;
+`;
+
 const Title = styled.h1`
+  margin: 0;
   color: var(--text);
   font-size: 1.75rem;
   font-weight: 700;
@@ -50,10 +56,10 @@ const Title = styled.h1`
 `;
 
 const Subtitle = styled.p`
-  margin-top: -1.5rem;
-  margin-bottom: 2rem;
+  margin: 0.5rem 0 0;
   color: var(--text-secondary);
   text-align: center;
+  line-height: 1.4;
 `;
 
 const TutorialButton = styled.button`
@@ -301,8 +307,10 @@ const Dashboard = () => {
           />
           <UserHeader />
           <TitleContainer>
-            <Title>Resumo mensal</Title>
-            <Subtitle>Acompanhe suas movimentações e resultados do mês selecionado.</Subtitle>
+            <HeadingBlock>
+              <Title>Resumo mensal</Title>
+              <Subtitle>Acompanhe suas movimentações e resultados do mês selecionado.</Subtitle>
+            </HeadingBlock>
             <TutorialButton onClick={() => setRunTutorial(true)} aria-label="Iniciar tutorial">
               <FaQuestionCircle />
               <span>Tutorial</span>
