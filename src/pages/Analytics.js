@@ -72,7 +72,8 @@ const Analytics = () => {
     'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
 
-  const years = [2023, 2024, 2025, 2026];
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, index) => currentYear - index);
 
   // Filtra transações baseado no tipo selecionado
   const filteredTransactions = selectedType
@@ -160,9 +161,17 @@ const Analytics = () => {
         </TabContainer>
 
         {activeView === 'resumo' ? (
-          <AnalyticsPanels transactions={filteredTransactions} />
+          <AnalyticsPanels
+            transactions={filteredTransactions}
+            monthName={monthNames[selectedMonth - 1]}
+            year={selectedYear}
+          />
         ) : (
-          <Charts transactions={filteredTransactions} />
+          <Charts
+            transactions={filteredTransactions}
+            monthName={monthNames[selectedMonth - 1]}
+            year={selectedYear}
+          />
         )}
       </AnalyticsContainer>
     </>
@@ -171,4 +180,3 @@ const Analytics = () => {
 }
 
 export default Analytics;
-

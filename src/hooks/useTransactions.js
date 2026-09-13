@@ -77,6 +77,7 @@ const useTransactions = (selectedMonth, selectedYear) => {
       const transactionData = {
         userId: currentUser.uid,
         type: transaction.type,
+        transactionType: transaction.transactionType,
         category: transaction.category,
         value: parseFloat(transaction.value),
         date: transaction.date,

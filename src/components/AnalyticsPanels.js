@@ -1,174 +1,252 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Doughnut, Bar } from 'react-chartjs-2';
-import { 
-  Chart as ChartJS,
-  ArcElement,
-  CategoryScale,
-  LinearScale,
+import { Bar } from 'react-chartjs-2';
+import {
   BarElement,
-  Title,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
   Tooltip,
-  Legend
 } from 'chart.js';
 
-ChartJS.register(
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const AnalyticsPanelContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-`;
-
-const Panel = styled.div`
-  background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-`;
-
-const PanelTitle = styled.h2`
-  color: var(--text);
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  text-align: center;
-`;
-
-const SummaryList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0;
-`;
-
-const SummaryItem = styled.li`
   display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
-  
-  &:last-child {
-    border-bottom: none;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+const MetricGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-const Label = styled.span`
+const Panel = styled.section`
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+`;
+
+const Metric = styled(Panel)`
+  border-top: 4px solid ${props => props.color};
+`;
+
+const Eyebrow = styled.span`
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+`;
+
+const MetricValue = styled.strong`
+  display: block;
+  margin-top: 0.35rem;
+  color: ${props => props.color};
+  font-size: 1.5rem;
+`;
+
+const PanelTitle = styled.h2`
+  margin: 0 0 0.35rem;
+  color: var(--text);
+  font-size: 1.15rem;
+`;
+
+const PanelDescription = styled.p`
+  margin: 0 0 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+`;
+
+const ChartWrapper = styled.div`
+  height: 320px;
+
+  @media (max-width: 600px) {
+    height: 260px;
+  }
+`;
+
+const GroupList = styled.div`
+  display: grid;
+  gap: 0.75rem;
+`;
+
+const GroupRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) repeat(3, minmax(95px, auto));
+  gap: 1rem;
+  align-items: center;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+`;
+
+const GroupName = styled.strong`
   color: var(--text);
 `;
 
-const Value = styled.span`
-  color: ${props => props.type === 'receita' ? 'var(--success)' : 'var(--danger)'};
-  font-weight: 500;
+const Amount = styled.span`
+  color: ${props => props.color};
+  font-size: 0.9rem;
+  text-align: right;
+
+  @media (max-width: 600px) {
+    text-align: left;
+  }
 `;
 
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
-};
+const EmptyState = styled.p`
+  margin: 0;
+  padding: 1rem 0;
+  color: var(--text-secondary);
+  text-align: center;
+`;
 
-const AnalyticsPanels = ({ transactions }) => {
-  // Agrupa transações por tipo
-  const groupedByType = transactions.reduce((acc, transaction) => {
-    const type = transaction.transactionType || 'Outros';
-    if (!acc[type]) {
-      acc[type] = {
-        receitas: 0,
-        despesas: 0,
-        total: 0
-      };
-    }
+const formatCurrency = value => new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+}).format(value);
+
+const AnalyticsPanels = ({ transactions, monthName, year }) => {
+  const groups = transactions.reduce((acc, transaction) => {
+    const group = transaction.transactionType || 'Outros';
+    if (!acc[group]) acc[group] = { receitas: 0, despesas: 0 };
+
+    const value = Number(transaction.value) || 0;
     if (transaction.type === 'receita') {
-      acc[type].receitas += Number(transaction.value) || 0;
-      acc[type].total += Number(transaction.value) || 0;
-    } else {
-      acc[type].despesas += Number(transaction.value) || 0;
-      acc[type].total -= Number(transaction.value) || 0;
+      acc[group].receitas += value;
+    } else if (transaction.type === 'despesa') {
+      acc[group].despesas += value;
     }
     return acc;
   }, {});
 
-  // Agrupa transações por categoria
-  const groupedByCategory = transactions.reduce((acc, transaction) => {
-    const category = transaction.category;
-    if (!acc[category]) {
-      acc[category] = 0;
-    }
-    if (transaction.type === 'despesa') {
-      acc[category] += transaction.value;
-    }
-    return acc;
-  }, {});
+  const totals = Object.values(groups).reduce(
+    (acc, group) => ({
+      receitas: acc.receitas + group.receitas,
+      despesas: acc.despesas + group.despesas,
+    }),
+    { receitas: 0, despesas: 0 }
+  );
+  const saldo = totals.receitas - totals.despesas;
+  const groupNames = Object.keys(groups);
 
-  // Prepara dados para o gráfico de grupos
-  const groupsChartData = {
-    labels: Object.keys(groupedByType),
+  const chartData = {
+    labels: groupNames,
     datasets: [
       {
-        data: Object.values(groupedByType).map(group => group.despesas),
-        backgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0',
-          '#9966FF'
-        ]
-      }
-    ]
+        label: 'Receitas',
+        data: groupNames.map(group => groups[group].receitas),
+        backgroundColor: '#10b981',
+        borderRadius: 6,
+      },
+      {
+        label: 'Despesas',
+        data: groupNames.map(group => groups[group].despesas),
+        backgroundColor: '#ef4444',
+        borderRadius: 6,
+      },
+    ],
   };
 
-  // Prepara dados para o gráfico de categorias
-  const categoriesChartData = {
-    labels: Object.keys(groupedByCategory),
-    datasets: [{
-      label: 'Despesas por Categoria',
-      data: Object.values(groupedByCategory),
-      backgroundColor: 'rgba(54, 162, 235, 0.5)',
-      borderColor: 'rgba(54, 162, 235, 1)',
-      borderWidth: 1
-    }]
-  };
-
-  const options = {
+  const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: value => formatCurrency(value),
+        },
+      },
+    },
     plugins: {
-      legend: {
-        position: 'bottom'
-      }
-    }
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: context => `${context.dataset.label}: ${formatCurrency(context.raw)}`,
+        },
+      },
+    },
   };
 
   return (
     <AnalyticsPanelContainer>
+      <MetricGrid>
+        <Metric color="var(--success)">
+          <Eyebrow>Receitas no período</Eyebrow>
+          <MetricValue color="var(--success)">{formatCurrency(totals.receitas)}</MetricValue>
+        </Metric>
+        <Metric color="var(--danger)">
+          <Eyebrow>Despesas no período</Eyebrow>
+          <MetricValue color="var(--danger)">{formatCurrency(totals.despesas)}</MetricValue>
+        </Metric>
+        <Metric color={saldo >= 0 ? 'var(--primary)' : 'var(--danger)'}>
+          <Eyebrow>Saldo do período</Eyebrow>
+          <MetricValue color={saldo >= 0 ? 'var(--primary)' : 'var(--danger)'}>
+            {formatCurrency(saldo)}
+          </MetricValue>
+        </Metric>
+      </MetricGrid>
+
       <Panel>
-        <PanelTitle>Distribuição por Grupos</PanelTitle>
-        <Doughnut data={groupsChartData} options={options} />
-        <SummaryList>
-          {Object.entries(groupedByType).map(([type, values]) => (
-            <SummaryItem key={type}>
-              <Label>{type}</Label>
-              <div>
-                <Value type="receita">{formatCurrency(values.receitas)}</Value>
-                {" / "}
-                <Value type="despesa">{formatCurrency(values.despesas)}</Value>
-              </div>
-            </SummaryItem>
-          ))}
-        </SummaryList>
+        <PanelTitle>Receitas e despesas por grupo</PanelTitle>
+        <PanelDescription>{monthName} de {year}</PanelDescription>
+        {groupNames.length > 0 ? (
+          <ChartWrapper>
+            <Bar data={chartData} options={chartOptions} />
+          </ChartWrapper>
+        ) : (
+          <EmptyState>Nenhuma transação encontrada neste período.</EmptyState>
+        )}
       </Panel>
 
       <Panel>
-        <PanelTitle>Despesas por Categoria</PanelTitle>
-        <Bar data={categoriesChartData} options={options} />
+        <PanelTitle>Resumo por grupo</PanelTitle>
+        <PanelDescription>Compare entradas, saídas e saldo de cada grupo.</PanelDescription>
+        {groupNames.length > 0 ? (
+          <GroupList>
+            <GroupRow>
+              <Eyebrow>Grupo</Eyebrow>
+              <Eyebrow>Receitas</Eyebrow>
+              <Eyebrow>Despesas</Eyebrow>
+              <Eyebrow>Saldo</Eyebrow>
+            </GroupRow>
+            {groupNames.map(group => {
+              const values = groups[group];
+              return (
+                <GroupRow key={group}>
+                  <GroupName>{group}</GroupName>
+                  <Amount color="var(--success)">{formatCurrency(values.receitas)}</Amount>
+                  <Amount color="var(--danger)">{formatCurrency(values.despesas)}</Amount>
+                  <Amount color={values.receitas - values.despesas >= 0 ? 'var(--primary)' : 'var(--danger)'}>
+                    {formatCurrency(values.receitas - values.despesas)}
+                  </Amount>
+                </GroupRow>
+              );
+            })}
+          </GroupList>
+        ) : (
+          <EmptyState>Nenhum grupo possui movimentações neste período.</EmptyState>
+        )}
       </Panel>
     </AnalyticsPanelContainer>
   );

@@ -38,6 +38,13 @@ const ChartContainer = styled.div`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 `;
 
+const ChartDescription = styled.p`
+  margin: -0.5rem 0 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: center;
+`;
+
 const ChartsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -73,7 +80,7 @@ const Checkbox = styled.label`
   color: var(--text);
 `;
 
-const Charts = ({ transactions }) => {
+const Charts = ({ transactions, monthName, year }) => {
   const [selectedCategories, setSelectedCategories] = useState({
     receita: categoriesByType.receita.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
     despesa: categoriesByType.despesa.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
@@ -139,9 +146,10 @@ const Charts = ({ transactions }) => {
       return `${label} (${percentage}%)`;
     });
 
-    const colors = type === 'receita' 
+    const colorPalette = type === 'receita'
       ? ['#2E7D32', '#388E3C', '#43A047', '#4CAF50', '#66BB6A', '#81C784']
       : ['#C62828', '#D32F2F', '#E53935', '#F44336', '#EF5350', '#E57373', '#EF9A9A', '#FFCDD2'];
+    const colors = data.map((_, index) => colorPalette[index % colorPalette.length]);
 
     return {
       labels: labelsWithPercentage,
@@ -217,6 +225,7 @@ const Charts = ({ transactions }) => {
       <ChartsGrid>
         <ChartContainer>
           <ChartTitle>Despesas por Categoria</ChartTitle>
+          <ChartDescription>{monthName} de {year}</ChartDescription>
           <Pie data={createChartData('despesa')} options={options} />
           <TotalValue type="despesa">
             Total: R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -225,6 +234,7 @@ const Charts = ({ transactions }) => {
         
         <ChartContainer>
           <ChartTitle>Receitas por Categoria</ChartTitle>
+          <ChartDescription>{monthName} de {year}</ChartDescription>
           <Pie data={createChartData('receita')} options={options} />
           <TotalValue type="receita">
             Total: R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
