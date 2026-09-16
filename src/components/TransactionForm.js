@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { transactionCategories } from '../constants/categories';
 import { transactionTypes } from '../constants/transactionTypes';
 import { formatCurrencyInput, parseCurrencyValue } from '../utils/currency';
+
+const getPeriodStartDate = (selectedMonth, selectedYear) => {
+  if (!selectedMonth || !selectedYear) return '';
+
+  return `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`;
+};
 
 const FormContainer = styled.div`
   background-color: var(--card-bg);
@@ -122,6 +128,17 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
   const [feedback, setFeedback] = useState('');
   const [errors, setErrors] = useState({});
 
+  useEffect(() => {
+    setDate(currentDate => {
+      if (!selectedMonth || !selectedYear) return currentDate;
+
+      const [currentYear, currentMonth] = currentDate.split('-').map(Number);
+      const isSamePeriod = currentYear === Number(selectedYear) && currentMonth === Number(selectedMonth);
+
+      return isSamePeriod ? currentDate : getPeriodStartDate(selectedMonth, selectedYear);
+    });
+  }, [selectedMonth, selectedYear]);
+
   const validateForm = () => {
     const newErrors = {};
     const numericValue = parseCurrencyValue(value);
@@ -164,7 +181,7 @@ const TransactionForm = ({ addTransaction, selectedMonth, selectedYear }) => {
       setTransactionType('');
       setCategory('');
       setValue('');
-      setDate('');
+      setDate(getPeriodStartDate(selectedMonth, selectedYear));
       setDescription('');
       setErrors({});
     } catch (error) {
