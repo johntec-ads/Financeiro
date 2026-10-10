@@ -141,7 +141,6 @@ const Td = styled.td`
   
   ${props => props.paid && `
     color: var(--text-secondary);
-    text-decoration: line-through;
   `}
 `;
 
@@ -291,7 +290,7 @@ const MobileHeaderTop = styled.div`
   align-items: center;
 `;
 
-const MobileDescription = styled.div`
+const TransactionDescription = styled.span`
   font-weight: 500;
   color: var(--text);
   text-decoration: ${props => props.paid ? 'line-through' : 'none'};
@@ -718,7 +717,11 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                     </ValueContainer>
                   </Td>
                   <Td paid={transaction.paid}>{formatDate(transaction.date)}</Td>
-                  <Td paid={transaction.paid}>{transaction.description}</Td>
+                  <Td paid={transaction.paid}>
+                    <TransactionDescription paid={transaction.paid}>
+                      {transaction.description}
+                    </TransactionDescription>
+                  </Td>
                   <Td>
                     <TableButtonsContainer>
                       <ActionButton onClick={() => handleEdit(transaction)} title="Editar" color="var(--primary)">
@@ -754,9 +757,9 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
             <MobileContentContainer>
               <MobileHeader>
                 <MobileHeaderTop>
-                  <MobileDescription paid={transaction.paid}>
+                  <TransactionDescription paid={transaction.paid}>
                     {transaction.description}
-                  </MobileDescription>
+                  </TransactionDescription>
                   <MobileValueSection>
                     <MobileTagContainer>
                       {transaction.type === 'despesa' && (
