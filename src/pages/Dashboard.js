@@ -132,7 +132,7 @@ const ContentContainer = styled.div`
   padding-bottom: 90px;
   
   @media (max-width: 768px) {
-    padding: 0 0 90px 0;
+    padding: 0 0 85px 0;
     overflow-x: hidden;
   }
 `;

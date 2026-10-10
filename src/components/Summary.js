@@ -23,7 +23,7 @@ const SummaryCard = styled.div`
   background-color: var(--card-bg);
   padding: 1.75rem;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
@@ -31,9 +31,22 @@ const SummaryCard = styled.div`
   position: relative;
   overflow: hidden;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+  }
+
+  @media (hover: none) {
+    &:active {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  @media (max-width: 768px) {
+    box-shadow: var(--shadow-sm);
   }
 
   &::before {
@@ -98,34 +111,41 @@ const PendingFooterBar = styled.div`
   bottom: 16px;
   transform: translateX(-50%);
   z-index: 1000;
-  width: min(720px, calc(100% - 20px));
+  width: min(620px, calc(100% - 32px));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.7rem 0.9rem;
-  background: var(--card-bg);
+  padding: 0.55rem 0.9rem;
+  background: rgba(15, 23, 42, 0.02);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(6px);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(8px);
+
+  @media (max-width: 768px) {
+    width: min(100%, calc(100% - 16px));
+    padding: 0.6rem 0.75rem;
+    bottom: 12px;
+  }
 `;
 
 const PendingFooterLabel = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
+  opacity: 0.9;
 `;
 
 const PendingFooterValue = styled.p`
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: var(--danger);
   letter-spacing: -0.02em;
 `;
