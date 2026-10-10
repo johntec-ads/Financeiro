@@ -145,9 +145,26 @@ const Td = styled.td`
   `}
 `;
 
+const TransactionRow = styled.tr`
+  background: ${props => {
+    if (props.type === 'receita') return 'rgba(16, 185, 129, 0.012)';
+    if (props.type === 'despesa') return 'rgba(239, 68, 68, 0.012)';
+    return 'transparent';
+  }};
+  border-left: 3px solid ${props => {
+    if (props.type === 'receita') return 'var(--success)';
+    if (props.type === 'despesa') return 'var(--danger)';
+    return 'var(--border)';
+  }};
+
+  &:hover td {
+    background: transparent;
+  }
+`;
+
 const PaidButton = styled.button`
   background: none;
-  border: 2px solid ${props => props.paid ? 'var(--success)' : 'var(--border)'};
+  border: 2px solid ${props => props.paid ? 'var(--primary)' : 'var(--border)'};
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -156,11 +173,17 @@ const PaidButton = styled.button`
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  color: ${props => props.paid ? 'var(--success)' : 'transparent'};
+  background-color: ${props => props.paid ? 'var(--primary)' : 'transparent'};
+  color: ${props => props.paid ? '#fff' : 'transparent'};
   
   &:hover {
-    border-color: var(--success);
-    background-color: var(--success-light);
+    border-color: var(--primary);
+    background-color: ${props => props.paid ? 'var(--primary-hover)' : 'var(--primary-light)'};
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
   }
 `;
 
@@ -200,12 +223,21 @@ const DueTag = styled.span`
 `;
 
 const MobileCard = styled.div`
-  background: var(--card-bg);
+  background: ${props => {
+    if (props.type === 'receita') return 'rgba(16, 185, 129, 0.012)';
+    if (props.type === 'despesa') return 'rgba(239, 68, 68, 0.012)';
+    return 'var(--card-bg)';
+  }};
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
+  border-left: 3px solid ${props => {
+    if (props.type === 'receita') return 'var(--success)';
+    if (props.type === 'despesa') return 'var(--danger)';
+    return 'var(--border)';
+  }};
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 1rem;
@@ -650,11 +682,13 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
           <tbody>
             {visibleTransactions.map(transaction => {
               return (
-                <tr key={transaction.id}>
+                <TransactionRow key={transaction.id} type={transaction.type}>
                   <Td>
                     <PaidButton
                       paid={transaction.paid}
                       onClick={() => handleTogglePaid(transaction)}
+                      aria-label={transaction.paid ? "Desmarcar como pago" : "Marcar como pago"}
+                      aria-pressed={transaction.paid}
                       title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
                     >
                       {transaction.paid && <FaCheck size={14} />}
@@ -695,7 +729,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
                       </ActionButton>
                     </TableButtonsContainer>
                   </Td>
-                </tr>
+                </TransactionRow>
               );
             })}
           </tbody>
@@ -704,11 +738,14 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
 
       <MobileContainer>
         {visibleTransactions.map(transaction => (
-          <MobileCard key={transaction.id}>
+          <MobileCard key={transaction.id} type={transaction.type}>
             <MobileStatusContainer>
               <PaidButton
                 paid={transaction.paid}
                 onClick={() => handleTogglePaid(transaction)}
+                aria-label={transaction.paid ? "Desmarcar como pago" : "Marcar como pago"}
+                aria-pressed={transaction.paid}
+                title={transaction.paid ? "Marcado como pago" : "Marcar como pago"}
               >
                 {transaction.paid && <FaCheck size={14} />}
               </PaidButton>
