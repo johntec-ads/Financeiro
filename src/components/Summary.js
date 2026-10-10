@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiArrowUpCircle, FiArrowDownCircle, FiDollarSign } from 'react-icons/fi';
+import { FiArrowUpCircle, FiArrowDownCircle, FiDollarSign, FiEye, FiEyeOff } from 'react-icons/fi';
+
+const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+}).format(value);
 
 const SummaryContainer = styled.div`
   display: grid;
@@ -87,83 +92,176 @@ const Value = styled.p`
   letter-spacing: -0.02em;
 `;
 
+const PendingCardContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+`;
+
+const PendingCard = styled.div`
+  width: min(320px, 100%);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem 1.1rem;
+`;
+
+const PendingHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+`;
+
+const PendingTitle = styled.h4`
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+`;
+
+const ToggleVisibilityButton = styled.button`
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+`;
+
+const PendingValue = styled.p`
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--danger);
+  letter-spacing: -0.02em;
+`;
+
+const HiddenCardButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+`;
+
 const Summary = ({ transactions }) => {
+  const [showPendingCard, setShowPendingCard] = useState(true);
+
   const calculateTotals = () => {
     if (!Array.isArray(transactions) || transactions.length === 0) {
       return {
         receitas: 0,
         despesas: 0,
-        saldo: 0
+        saldo: 0,
+        pendentes: 0
       };
     }
 
     return transactions.reduce((acc, transaction) => {
       const value = Number(transaction.value) || 0;
-      
+
       if (transaction.type === 'receita') {
         acc.receitas += value;
       } else if (transaction.type === 'despesa') {
         acc.despesas += value;
+
+        if (transaction.paid) {
+          acc.pagamentosRealizados += value;
+        }
       }
-      
+
       acc.saldo = acc.receitas - acc.despesas;
+      acc.pendentes = Math.max(acc.despesas - acc.pagamentosRealizados, 0);
       return acc;
     }, {
       receitas: 0,
       despesas: 0,
-      saldo: 0
+      saldo: 0,
+      pagamentosRealizados: 0,
+      pendentes: 0
     });
   };
 
-  const { receitas, despesas, saldo } = calculateTotals();
+  const { receitas, despesas, saldo, pendentes } = calculateTotals();
 
   return (
-    <SummaryContainer>
-      <SummaryCard type="receita">
-        <CardHeader>
-          <Title>Entradas</Title>
-          <IconWrapper type="receita">
-            <FiArrowUpCircle />
-          </IconWrapper>
-        </CardHeader>
-        <Value>
-          {new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-          }).format(receitas)}
-        </Value>
-      </SummaryCard>
+    <>
+      <SummaryContainer>
+        <SummaryCard type="receita">
+          <CardHeader>
+            <Title>Entradas</Title>
+            <IconWrapper type="receita">
+              <FiArrowUpCircle />
+            </IconWrapper>
+          </CardHeader>
+          <Value>{formatCurrency(receitas)}</Value>
+        </SummaryCard>
 
-      <SummaryCard type="despesa">
-        <CardHeader>
-          <Title>Saídas</Title>
-          <IconWrapper type="despesa">
-            <FiArrowDownCircle />
-          </IconWrapper>
-        </CardHeader>
-        <Value>
-          {new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-          }).format(despesas)}
-        </Value>
-      </SummaryCard>
+        <SummaryCard type="despesa">
+          <CardHeader>
+            <Title>Saídas</Title>
+            <IconWrapper type="despesa">
+              <FiArrowDownCircle />
+            </IconWrapper>
+          </CardHeader>
+          <Value>{formatCurrency(despesas)}</Value>
+        </SummaryCard>
 
-      <SummaryCard type="saldo">
-        <CardHeader>
-          <Title>Saldo Total</Title>
-          <IconWrapper type="saldo">
-            <FiDollarSign />
-          </IconWrapper>
-        </CardHeader>
-        <Value style={{ color: saldo >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-          {new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-          }).format(saldo)}
-        </Value>
-      </SummaryCard>
-    </SummaryContainer>
+        <SummaryCard type="saldo">
+          <CardHeader>
+            <Title>Saldo Total</Title>
+            <IconWrapper type="saldo">
+              <FiDollarSign />
+            </IconWrapper>
+          </CardHeader>
+          <Value style={{ color: saldo >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+            {formatCurrency(saldo)}
+          </Value>
+        </SummaryCard>
+      </SummaryContainer>
+
+      {showPendingCard ? (
+        <PendingCardContainer>
+          <PendingCard>
+            <PendingHeader>
+              <PendingTitle>Restante a pagar</PendingTitle>
+              <ToggleVisibilityButton
+                type="button"
+                aria-label="Ocultar card"
+                onClick={() => setShowPendingCard(false)}
+              >
+                <FiEyeOff size={12} />
+                Ocultar
+              </ToggleVisibilityButton>
+            </PendingHeader>
+            <PendingValue>{formatCurrency(pendentes)}</PendingValue>
+          </PendingCard>
+        </PendingCardContainer>
+      ) : (
+        <HiddenCardButtonWrapper>
+          <ToggleVisibilityButton
+            type="button"
+            aria-label="Mostrar card"
+            onClick={() => setShowPendingCard(true)}
+          >
+            <FiEye size={12} />
+            Mostrar card
+          </ToggleVisibilityButton>
+        </HiddenCardButtonWrapper>
+      )}
+    </>
   );
 };
 
