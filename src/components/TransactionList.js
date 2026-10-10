@@ -14,6 +14,14 @@ const FilterBar = styled.div`
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+  }
 
   @media (max-width: 768px) {
     display: none;
@@ -82,9 +90,24 @@ const FilterScopeText = styled.span`
 const TableContainer = styled.div`
   background-color: var(--card-bg);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   overflow: hidden; // Importante para bordas arredondadas
   border: 1px solid var(--border);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+  }
+
+  @media (hover: none) {
+    &:active {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+  }
 
   @media (max-width: 768px) {
     display: none;
@@ -182,6 +205,21 @@ const MobileCard = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 1rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+  }
+
+  @media (hover: none) {
+    &:active {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+  }
 `;
 
 const MobileStatusContainer = styled.div`
@@ -731,12 +769,21 @@ const ActionButton = styled.button`
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   color: var(--text-secondary);
 
   &:hover {
     background-color: var(--bg-secondary);
     color: ${props => props.color || 'var(--text)'};
+    transform: translateY(-1px);
+  }
+
+  @media (hover: none) {
+    &:active {
+      background-color: var(--bg-secondary);
+      color: ${props => props.color || 'var(--text)'};
+      transform: translateY(-1px);
+    }
   }
 `;
 
