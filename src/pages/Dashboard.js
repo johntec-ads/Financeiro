@@ -189,15 +189,19 @@ const CustomJoyrideStyles = {
   },
 };
 
-// Media query para mobile
-const isMobile = window.innerWidth <= 600;
-
 const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [runTutorial, setRunTutorial] = useState(false);
+
+  useEffect(() => {
+    const updateMobileState = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', updateMobileState);
+    return () => window.removeEventListener('resize', updateMobileState);
+  }, []);
 
   useEffect(() => {
     if (!currentUser) {
@@ -214,120 +218,58 @@ const Dashboard = () => {
     }
   };
 
-  const stepsDesktop = [
-    {
-      target: '.navbar',
-      title: 'Navegação do sistema',
-      content: (
-        <>
-          Use <strong>Resumo mensal</strong> para lançar e acompanhar as movimentações do mês.
-          A <strong>Análise anual</strong> mostra a evolução de receitas, despesas e saldo ao longo do ano.
-        </>
-      ),
-      disableBeacon: true,
-    },
-    {
-      target: '.joyride-tipo',
-      title: '1. Defina o tipo',
-      content: (
-        <>
-          Escolha <strong>Receita</strong> para o dinheiro que entra ou <strong>Despesa</strong> para o dinheiro que sai.
-          O tipo fica selecionado para facilitar lançamentos consecutivos.
-        </>
-      ),
-    },
-    {
-      target: '.joyride-grupo',
-      title: '2. Escolha o grupo',
-      content: (
-        <>
-          Selecione a área da movimentação, como <strong>Pessoal</strong>, <strong>Trabalho</strong>,
-          <strong> Família</strong> ou <strong>Investimentos</strong>.
-        </>
-      ),
-    },
-    {
-      target: '.joyride-categoria',
-      title: '3. Detalhe a categoria',
-      content: (
-        <>
-          As categorias dependem do <strong>Tipo</strong> e do <strong>Grupo</strong>.
-          Primeiro escolha o Grupo; depois selecione a categoria mais adequada.
-        </>
-      ),
-    },
-    {
-      target: '.joyride-valor',
-      title: '4. Informe o valor',
-      content: 'Digite o valor da movimentação. Use o formato de moeda local, por exemplo, 1.250,00.',
-    },
-    {
-      target: '.joyride-data',
-      title: '5. Informe a data',
-      content: 'Selecione quando a movimentação aconteceu. A data define em qual mês e ano ela aparecerá nos resumos.',
-    },
-    {
-      target: '.joyride-descricao',
-      title: '6. Adicione uma descrição',
-      content: (
-        <>
-          Este campo é opcional. Use uma descrição curta para facilitar consultas futuras,
-          como <strong>Almoço com cliente</strong> ou <strong>Conta de luz</strong>.
-        </>
-      ),
-    },
-    {
-      target: '.add-transaction-btn',
-      title: '7. Salve o lançamento',
-      content: 'Confira os dados e clique aqui para registrar a movimentação na lista do resumo mensal.',
-    },
-  ];
-
-  const stepsMobile = [
+  const steps = [
     {
       target: '.navbar',
       title: 'Navegação',
-      content: 'Use Resumo mensal para os lançamentos e Análise anual para acompanhar o ano.',
+      content: 'O Resumo mensal concentra os lançamentos e o acompanhamento do mês. A Análise anual reúne os resultados e gráficos do ano.',
       disableBeacon: true,
     },
     {
+      target: '.joyride-period-filter',
+      title: 'Escolha o período',
+      content: 'Selecione mês e ano. Os totais e lançamentos desta tela acompanham o período selecionado.',
+    },
+    {
+      target: '.joyride-summary',
+      title: 'Resumo do mês',
+      content: 'Entradas mostram as receitas; Saídas, as despesas; e Saldo Total é a diferença entre elas, independentemente do pagamento.',
+    },
+    {
+      target: '.joyride-pending',
+      title: 'Restante a pagar',
+      content: 'Este valor soma as despesas ainda não pagas. Você pode ocultar a barra e reabri-la pelo botão Mostrar card.',
+    },
+    {
       target: '.joyride-tipo',
-      title: '1. Tipo',
-      content: 'Escolha Receita (entrada) ou Despesa (saída). O tipo permanece selecionado no próximo lançamento.',
+      title: 'Comece um lançamento',
+      content: 'Escolha Receita para uma entrada ou Despesa para uma saída. O tipo determina as categorias disponíveis.',
     },
     {
       target: '.joyride-grupo',
-      title: '2. Grupo',
-      content: 'Escolha o grupo da movimentação, como Pessoal, Trabalho, Família ou Investimentos.',
-    },
-    {
-      target: '.joyride-categoria',
-      title: '3. Categoria',
-      content: 'Escolha o Grupo primeiro. As categorias disponíveis mudam conforme o Tipo e o Grupo.',
-    },
-    {
-      target: '.joyride-valor',
-      title: '4. Valor',
-      content: 'Digite o valor da movimentação.',
-    },
-    {
-      target: '.joyride-data',
-      title: '5. Data',
-      content: 'A data define o mês do Resumo mensal e o ano da Análise anual.',
-    },
-    {
-      target: '.joyride-descricao',
-      title: '6. Descrição opcional',
-      content: 'Adicione uma observação curta para encontrar este lançamento com mais facilidade depois.',
+      title: 'Grupo e categoria',
+      content: 'Escolha o grupo e depois uma categoria. Informe também valor e data; a descrição é opcional. A data define o período do lançamento.',
     },
     {
       target: '.add-transaction-btn',
-      title: '7. Salvar',
-      content: 'Confira os dados e toque aqui para salvar.',
+      title: 'Salvar lançamento',
+      content: isMobile ? 'Toque aqui para validar e salvar a movimentação.' : 'Clique aqui para validar e salvar a movimentação.',
     },
+    {
+      target: '.joyride-transactions',
+      title: 'Acompanhe os lançamentos',
+      content: transactions.length
+        ? 'Na lista, use o controle de status para marcar uma despesa como paga. Também é possível editar ou excluir lançamentos; itens pagos ficam visualmente atenuados.'
+        : 'Depois de salvar o primeiro lançamento, ele aparecerá nesta área. Você poderá marcar despesas como pagas e editar ou excluir itens.',
+    },
+    ...(transactions.length > 0 ? [{
+      target: isMobile ? '.joyride-expense-filters-mobile' : '.joyride-expense-filters-desktop',
+      title: 'Filtre e ordene despesas',
+      content: isMobile
+        ? 'Toque em Mostrar filtros de despesas para filtrar por vencimento ou pagamento e ordenar por vencimento ou valor.'
+        : 'Filtre despesas vencidas, próximas, pagas ou não pagas e ordene por vencimento ou valor.',
+    }] : []),
   ];
-
-  const steps = isMobile ? stepsMobile : stepsDesktop;
 
   const locale = {
     back: 'Voltar',
@@ -372,7 +314,7 @@ const Dashboard = () => {
           </TitleContainer>
           <NavBar />
 
-          <FilterContainer>
+          <FilterContainer className="joyride-period-filter">
             <Select 
               value={selectedMonth} 
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
@@ -400,13 +342,15 @@ const Dashboard = () => {
             <TransactionForm addTransaction={addTransaction} selectedMonth={selectedMonth} selectedYear={selectedYear} />
             {loading && <p>Carregando transações...</p>}
             {error && <p>Erro ao carregar transações.</p>}
-            <TransactionList 
-              transactions={transactions} 
-              deleteTransaction={deleteTransaction} 
-              updateTransaction={updateTransaction}
-              loading={loading}
-              error={error}
-            />
+            <div className="joyride-transactions">
+              <TransactionList 
+                transactions={transactions} 
+                deleteTransaction={deleteTransaction} 
+                updateTransaction={updateTransaction}
+                loading={loading}
+                error={error}
+              />
+            </div>
           </ContentContainer>
         </>
       ) : (

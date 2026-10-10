@@ -221,7 +221,7 @@ const Summary = ({ transactions }) => {
 
   return (
     <>
-      <SummaryContainer>
+      <SummaryContainer className="joyride-summary">
         <SummaryCard type="receita">
           <CardHeader>
             <Title>Entradas</Title>
@@ -256,7 +256,7 @@ const Summary = ({ transactions }) => {
       </SummaryContainer>
 
       {showPendingCard ? (
-        <PendingFooterBar>
+        <PendingFooterBar className="joyride-pending">
           <PendingFooterLabel>
             <span>Restante a pagar</span>
           </PendingFooterLabel>
@@ -273,7 +273,7 @@ const Summary = ({ transactions }) => {
           </div>
         </PendingFooterBar>
       ) : (
-        <HiddenCardButtonWrapper>
+        <HiddenCardButtonWrapper className="joyride-pending">
           <ToggleVisibilityButton
             type="button"
             aria-label="Mostrar card"

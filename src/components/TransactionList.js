@@ -595,7 +595,7 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
         </ModalBody>
       </Modal>
 
-      <FilterBar>
+      <FilterBar className="joyride-expense-filters-desktop">
         <FilterField>
           <FilterLabel htmlFor="due-filter-desktop">Vencimento</FilterLabel>
           <FilterSelect
@@ -628,7 +628,11 @@ const TransactionList = ({ transactions, deleteTransaction, updateTransaction, l
       </FilterBar>
 
       <MobileFilterWrapper>
-        <ToggleFiltersButton type="button" onClick={() => setShowMobileFilters((prev) => !prev)}>
+        <ToggleFiltersButton
+          className="joyride-expense-filters-mobile"
+          type="button"
+          onClick={() => setShowMobileFilters((prev) => !prev)}
+        >
           {showMobileFilters ? 'Ocultar filtros de despesas' : 'Mostrar filtros de despesas'}
         </ToggleFiltersButton>
 

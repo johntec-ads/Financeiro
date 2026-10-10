@@ -1,5 +1,7 @@
 # Análise e Roadmap para Comercialização do Sistema Financeiro
 
+> Documento de planejamento estratégico elaborado em 12 de abril de 2025. Não é o tutorial de uso da aplicação; os itens abaixo são propostas e não necessariamente representam recursos disponíveis atualmente.
+
 ## Visão Geral
 Este documento apresenta uma análise do potencial comercial da aplicação financeira atual e define um plano estratégico de desenvolvimento para transformá-la em um produto comercialmente viável.
 

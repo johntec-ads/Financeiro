@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import Joyride, { STATUS } from 'react-joyride';
 import Charts from '../components/Charts';
 import NavBar from '../components/NavBar';
 import UserHeader from '../components/UserHeader';
 import useTransactions from '../hooks/useTransactions';
 import AnalyticsPanels from '../components/AnalyticsPanels';
+import { FaQuestionCircle } from 'react-icons/fa';
 
 const AnalyticsContainer = styled.div`
   max-width: 1200px;
@@ -22,6 +24,27 @@ const Subtitle = styled.p`
   margin: 0 0 2rem;
   color: var(--text-secondary);
   text-align: center;
+`;
+
+const TutorialButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 auto 1.5rem;
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  &:hover {
+    color: var(--primary);
+    background: var(--primary-light);
+    border-color: var(--primary-light);
+  }
 `;
 
 const FilterContainer = styled.div`
@@ -66,11 +89,47 @@ const Tab = styled.button`
 const Analytics = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [activeView, setActiveView] = useState('resumo');
+  const [runTutorial, setRunTutorial] = useState(false);
   
   const { transactions, loading, error } = useTransactions(null, selectedYear);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, index) => currentYear - index);
+
+  const handleJoyrideCallback = ({ status }) => {
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      setRunTutorial(false);
+    }
+  };
+
+  const steps = [
+    {
+      target: '.joyride-analytics-year',
+      title: 'Selecione o ano',
+      content: 'Os indicadores e a evolução mensal consideram as movimentações do ano selecionado.',
+      disableBeacon: true,
+    },
+    {
+      target: '.joyride-analytics-tabs',
+      title: 'Resumo ou gráficos',
+      content: 'Use Resumo para consultar os totais anuais e Gráficos Detalhados para comparar receitas e despesas mês a mês.',
+    },
+    {
+      target: '.joyride-analytics-results',
+      title: 'Leia os resultados',
+      content: activeView === 'resumo'
+        ? 'O resumo apresenta receitas, despesas e saldo anual. O saldo é calculado pela diferença entre receitas e despesas.'
+        : 'O gráfico compara receitas e despesas por mês. Passe o cursor ou toque nos pontos para consultar os valores.',
+    },
+  ];
+
+  const locale = {
+    back: 'Voltar',
+    close: 'Fechar',
+    last: 'Finalizar',
+    next: 'Próximo',
+    skip: 'Pular',
+  };
 
   if (loading) {
     return (
@@ -102,14 +161,29 @@ const Analytics = () => {
 
   return (
     <>
+      <Joyride
+        steps={steps}
+        run={runTutorial}
+        continuous
+        showSkipButton
+        showProgress
+        locale={locale}
+        callback={handleJoyrideCallback}
+        styles={{ options: { zIndex: 9999, primaryColor: '#6366f1' } }}
+      />
       <UserHeader />
       <NavBar />
       <AnalyticsContainer>
         <Title>Análise anual</Title>
         <Subtitle>Veja a evolução das receitas, despesas e do saldo ao longo do ano.</Subtitle>
+        <TutorialButton type="button" onClick={() => setRunTutorial(true)} aria-label="Iniciar tutorial da análise anual">
+          <FaQuestionCircle />
+          Tutorial da análise anual
+        </TutorialButton>
 
         <FilterContainer>
           <Select 
+            className="joyride-analytics-year"
             value={selectedYear} 
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
           >
@@ -120,7 +194,7 @@ const Analytics = () => {
 
         </FilterContainer>
 
-        <TabContainer>
+        <TabContainer className="joyride-analytics-tabs">
           <Tab 
             active={activeView === 'resumo'} 
             onClick={() => setActiveView('resumo')}
@@ -135,17 +209,19 @@ const Analytics = () => {
           </Tab>
         </TabContainer>
 
-        {activeView === 'resumo' ? (
-          <AnalyticsPanels
-            transactions={transactions}
-            year={selectedYear}
-          />
-        ) : (
-          <Charts
-            transactions={transactions}
-            year={selectedYear}
-          />
-        )}
+        <div className="joyride-analytics-results">
+          {activeView === 'resumo' ? (
+            <AnalyticsPanels
+              transactions={transactions}
+              year={selectedYear}
+            />
+          ) : (
+            <Charts
+              transactions={transactions}
+              year={selectedYear}
+            />
+          )}
+        </div>
       </AnalyticsContainer>
     </>
 
