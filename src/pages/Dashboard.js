@@ -129,9 +129,10 @@ const Select = styled.select`
 
 const ContentContainer = styled.div`
   width: 100%;
+  padding-bottom: 90px;
   
   @media (max-width: 768px) {
-    padding: 0;
+    padding: 0 0 90px 0;
     overflow-x: hidden;
   }
 `;

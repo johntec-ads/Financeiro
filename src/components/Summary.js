@@ -92,35 +92,42 @@ const Value = styled.p`
   letter-spacing: -0.02em;
 `;
 
-const PendingCardContainer = styled.div`
+const PendingFooterBar = styled.div`
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: min(720px, calc(100% - 20px));
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 2rem;
-`;
-
-const PendingCard = styled.div`
-  width: min(320px, 100%);
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(6px);
 `;
 
-const PendingHeader = styled.div`
+const PendingFooterLabel = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 `;
 
-const PendingTitle = styled.h4`
+const PendingFooterValue = styled.p`
   margin: 0;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--danger);
+  letter-spacing: -0.02em;
 `;
 
 const ToggleVisibilityButton = styled.button`
@@ -128,32 +135,28 @@ const ToggleVisibilityButton = styled.button`
   background: transparent;
   color: var(--text-secondary);
   border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.72rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   cursor: pointer;
 
   &:hover {
     border-color: var(--primary);
-    color: var(--primary);
+    color: var(--text);
   }
 `;
 
-const PendingValue = styled.p`
-  margin: 0;
-  font-size: 1.7rem;
-  font-weight: 700;
-  color: var(--danger);
-  letter-spacing: -0.02em;
-`;
-
 const HiddenCardButtonWrapper = styled.div`
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 1000;
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 2rem;
 `;
 
 const Summary = ({ transactions }) => {
@@ -233,22 +236,22 @@ const Summary = ({ transactions }) => {
       </SummaryContainer>
 
       {showPendingCard ? (
-        <PendingCardContainer>
-          <PendingCard>
-            <PendingHeader>
-              <PendingTitle>Restante a pagar</PendingTitle>
-              <ToggleVisibilityButton
-                type="button"
-                aria-label="Ocultar card"
-                onClick={() => setShowPendingCard(false)}
-              >
-                <FiEyeOff size={12} />
-                Ocultar
-              </ToggleVisibilityButton>
-            </PendingHeader>
-            <PendingValue>{formatCurrency(pendentes)}</PendingValue>
-          </PendingCard>
-        </PendingCardContainer>
+        <PendingFooterBar>
+          <PendingFooterLabel>
+            <span>Restante a pagar</span>
+          </PendingFooterLabel>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <PendingFooterValue>{formatCurrency(pendentes)}</PendingFooterValue>
+            <ToggleVisibilityButton
+              type="button"
+              aria-label="Ocultar card"
+              onClick={() => setShowPendingCard(false)}
+            >
+              <FiEyeOff size={12} />
+              Ocultar
+            </ToggleVisibilityButton>
+          </div>
+        </PendingFooterBar>
       ) : (
         <HiddenCardButtonWrapper>
           <ToggleVisibilityButton
