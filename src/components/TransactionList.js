@@ -172,7 +172,11 @@ const ValueContainer = styled.div`
 `;
 
 const ValueText = styled.span`
-  color: ${props => props.type === 'receita' ? 'var(--success)' : 'var(--text)'};
+  color: ${props => {
+    if (props.type === 'receita') return 'var(--success)';
+    if (props.type === 'despesa') return 'var(--danger)';
+    return 'var(--text)';
+  }};
   font-weight: 600;
   font-family: 'Inter', monospace; // Números monoespaçados ficam melhores
 `;

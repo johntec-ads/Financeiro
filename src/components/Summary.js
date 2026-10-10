@@ -239,7 +239,7 @@ const Summary = ({ transactions }) => {
               <FiArrowDownCircle />
             </IconWrapper>
           </CardHeader>
-          <Value>{formatCurrency(despesas)}</Value>
+          <Value style={{ color: 'var(--danger)' }}>{formatCurrency(despesas)}</Value>
         </SummaryCard>
 
         <SummaryCard type="saldo">
